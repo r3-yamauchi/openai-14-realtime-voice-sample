@@ -45,9 +45,9 @@ function BottomToolbar({
   };
 
   function getConnectionButtonLabel() {
-    if (isConnected) return "Disconnect";
-    if (isConnecting) return "Connecting...";
-    return "Connect";
+    if (isConnected) return "切断";
+    if (isConnecting) return "接続中...";
+    return "接続";
   }
 
   function getConnectionButtonClasses() {
@@ -55,10 +55,10 @@ function BottomToolbar({
     const cursorClass = isConnecting ? "cursor-not-allowed" : "cursor-pointer";
 
     if (isConnected) {
-      // Connected -> label "Disconnect" -> red
+      // 接続済み -> ラベル「切断」 -> 赤
       return `bg-red-600 hover:bg-red-700 ${cursorClass} ${baseClasses}`;
     }
-    // Disconnected or connecting -> label is either "Connect" or "Connecting" -> black
+    // 切断済みまたは接続中 -> ラベルは「接続」または「接続中」 -> 黒
     return `bg-black hover:bg-gray-900 ${cursorClass} ${baseClasses}`;
   }
 
@@ -85,7 +85,7 @@ function BottomToolbar({
           htmlFor="push-to-talk"
           className="flex items-center cursor-pointer"
         >
-          Push to talk
+          Push-to-Talk
         </label>
         <button
           onMouseDown={handleTalkButtonDown}
@@ -99,7 +99,7 @@ function BottomToolbar({
             (!isPTTActive ? " bg-gray-100 text-gray-400" : "")
           }
         >
-          Talk
+          話す
         </button>
       </div>
 
@@ -116,7 +116,7 @@ function BottomToolbar({
           htmlFor="audio-playback"
           className="flex items-center cursor-pointer"
         >
-          Audio playback
+          オーディオ再生
         </label>
       </div>
 
@@ -129,7 +129,7 @@ function BottomToolbar({
           className="w-4 h-4"
         />
         <label htmlFor="logs" className="flex items-center cursor-pointer">
-          Logs
+          ログ
         </label>
       </div>
       <div className="flex flex-row items-center gap-2">
@@ -141,19 +141,18 @@ function BottomToolbar({
           className="w-4 h-4"
         />
         <label htmlFor="transcript" className="flex items-center cursor-pointer">
-          Transcript
+          トランスクリプト
         </label>
       </div>
 
       <div className="flex flex-row items-center gap-2">
         <div>Codec:</div>
         {/*
-          Codec selector – Lets you force the WebRTC track to use 8 kHz 
-          PCMU/PCMA so you can preview how the agent will sound 
-          (and how ASR/VAD will perform) when accessed via a 
-          phone network.  Selecting a codec reloads the page with ?codec=...
-          which our App-level logic picks up and applies via a WebRTC monkey
-          patch (see codecPatch.ts).
+          コーデックセレクター – WebRTCトラックに8 kHz PCMU/PCMAを強制的に使用させ、
+          電話ネットワーク経由でアクセスされた場合にエージェントがどのように聞こえるか
+          （およびASR/VADがどのように機能するか）をプレビューできます。コーデックを選択すると、
+          ページが?codec=...でリロードされ、AppレベルのロジックがWebRTCモンキーパッチ
+          （codecPatch.tsを参照）を介してそれを取得し適用します。
         */}
         <select
           id="codec-select"

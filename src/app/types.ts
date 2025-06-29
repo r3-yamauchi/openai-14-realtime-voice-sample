@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Define the allowed moderation categories only once
+// 許可されたモデレーションカテゴリを一度だけ定義します
 export const MODERATION_CATEGORIES = [
   "OFFENSIVE",
   "OFF_BRAND",
@@ -43,14 +43,14 @@ export interface Tool {
 
 export interface AgentConfig {
   name: string;
-  publicDescription: string; // gives context to agent transfer tool
+  publicDescription: string; // エージェント転送ツールにコンテキストを提供します
   instructions: string;
   tools: Tool[];
   toolLogic?: Record<
     string,
     (args: any, transcriptLogsFiltered: TranscriptItem[], addTranscriptBreadcrumb?: (title: string, data?: any) => void) => Promise<any> | any
   >;
-  // addTranscriptBreadcrumb is a param in case we want to add additional breadcrumbs, e.g. for nested tool calls from a supervisor agent.
+  // addTranscriptBreadcrumbは、ネストされたツール呼び出し（スーパーバイザーエージェントからのものなど）の追加のブレッドクラムを追加したい場合に備えてのパラメータです。
   downstreamAgents?:
     | AgentConfig[]
     | { name: string; publicDescription: string }[];

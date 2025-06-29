@@ -1,7 +1,7 @@
-// WAV conversion utilities
+// WAV変換ユーティリティ
 
 /**
- * Writes a string into a DataView at the given offset.
+ * 指定されたオフセットでDataViewに文字列を書き込みます。
  */
 export function writeString(view: DataView, offset: number, str: string) {
   for (let i = 0; i < str.length; i++) {
@@ -10,7 +10,7 @@ export function writeString(view: DataView, offset: number, str: string) {
 }
 
 /**
- * Converts a Float32Array to 16-bit PCM in a DataView.
+ * Float32ArrayをDataView内の16ビットPCMに変換します。
  */
 export function floatTo16BitPCM(output: DataView, offset: number, input: Float32Array) {
   for (let i = 0; i < input.length; i++, offset += 2) {
@@ -20,7 +20,7 @@ export function floatTo16BitPCM(output: DataView, offset: number, input: Float32
 }
 
 /**
- * Encodes a Float32Array as a WAV file.
+ * Float32ArrayをWAVファイルとしてエンコードします。
  */
 export function encodeWAV(samples: Float32Array, sampleRate: number): ArrayBuffer {
   const buffer = new ArrayBuffer(44 + samples.length * 2);
@@ -59,7 +59,7 @@ export function encodeWAV(samples: Float32Array, sampleRate: number): ArrayBuffe
 }
 
 /**
- * Converts a WebM audio blob to a WAV blob.
+ * WebMオーディオBlobをWAV Blobに変換します。
  */
 export async function convertWebMBlobToWav(blob: Blob): Promise<Blob> {
   const arrayBuffer = await blob.arrayBuffer();
@@ -69,7 +69,7 @@ export async function convertWebMBlobToWav(blob: Blob): Promise<Blob> {
   const length = audioBuffer.length;
   const combined = new Float32Array(length);
 
-  // Average channels to produce mono output
+  // モノラル出力を生成するためにチャンネルを平均化します
   for (let channel = 0; channel < numChannels; channel++) {
     const channelData = audioBuffer.getChannelData(channel);
     for (let i = 0; i < length; i++) {

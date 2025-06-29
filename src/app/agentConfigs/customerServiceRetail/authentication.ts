@@ -4,12 +4,14 @@ export const authenticationAgent = new RealtimeAgent({
   name: 'authentication',
   voice: 'sage',  
   handoffDescription:
-    'The initial agent that greets the user, does authentication and routes them to the correct downstream agent.',
+    'ユーザーに挨拶し、認証を行い、正しいダウンストリームエージェントにルーティングする初期エージェント。',
 
   instructions: `
+必ず日本語で応答してください。ユーザーとの会話は全て日本語で行ってください。
+
 # Personality and Tone
-## Identity
-You are a calm, approachable online store assistant who’s also a dedicated snowboard enthusiast. You’ve spent years riding the slopes, testing out various boards, boots, and bindings in all sorts of conditions. Your knowledge stems from firsthand experience, making you the perfect guide for customers looking to find their ideal snowboard gear. You love sharing tips about handling different terrains, waxing boards, or simply choosing the right gear for a comfortable ride.
+## アイデンティティ
+あなたは、献身的なスノーボード愛好家でもある、穏やかで親しみやすいオンラインストアアシスタントです。長年ゲレンデを滑り、あらゆる状況で様々なボード、ブーツ、ビンディングを試してきました。あなたの知識は直接の経験から生まれており、理想的なスノーボードギアを探している顧客にとって完璧なガイドとなります。様々な地形での扱い方、ボードのワックスがけ、または快適なライディングのための適切なギアの選び方について、ヒントを共有するのが大好きです。
 
 ## Task
 You are here to assist customers in finding the best snowboard gear for their needs. This could involve answering questions about board sizes, providing care instructions, or offering recommendations based on experience level, riding style, or personal preference.
@@ -214,30 +216,30 @@ You’re always ready with a friendly follow-up question or a quick tip gleaned 
     tool({
       name: "authenticate_user_information",
       description:
-        "Look up a user's information with phone, last_4_cc_digits, last_4_ssn_digits, and date_of_birth to verify and authenticate the user. Should be run once the phone number and last 4 digits are confirmed.",
+        "電話番号、クレジットカードの下4桁、SSNの下4桁、生年月日を使用してユーザーの情報を検索し、ユーザーを検証および認証します。電話番号と下4桁が確認された後に実行する必要があります。",
       parameters: {
         type: "object",
         properties: {
           phone_number: {
             type: "string",
             description:
-              "User's phone number used for verification. Formatted like '(111) 222-3333'",
+              "検証に使用されるユーザーの電話番号。'(111) 222-3333' の形式でフォーマットされます。",
             pattern: "^\\(\\d{3}\\) \\d{3}-\\d{4}$",
           },
           last_4_digits: {
             type: "string",
             description:
-              "Last 4 digits of the user's credit card for additional verification. Either this or 'last_4_ssn_digits' is required.",
+              "追加の検証のためのユーザーのクレジットカードの下4桁。これまたは 'last_4_ssn_digits' が必須です。",
           },
           last_4_digits_type: {
             type: "string",
             enum: ["credit_card", "ssn"],
             description:
-              "The type of last_4_digits provided by the user. Should never be assumed, always confirm.",
+              "ユーザーが提供したlast_4_digitsのタイプ。決して仮定せず、常に確認してください。",
           },
           date_of_birth: {
             type: "string",
-            description: "User's date of birth in the format 'YYYY-MM-DD'.",
+            description: "ユーザーの生年月日。'YYYY-MM-DD' 形式。",
             pattern: "^\\d{4}-\\d{2}-\\d{2}$",
           },
         },
@@ -256,32 +258,32 @@ You’re always ready with a friendly follow-up question or a quick tip gleaned 
     tool({
       name: "save_or_update_address",
       description:
-        "Saves or updates an address for a given phone number. Should be run only if the user is authenticated and provides an address. Only run AFTER confirming all details with the user.",
+        "指定された電話番号の住所を保存または更新します。ユーザーが認証され、住所を提供した場合にのみ実行する必要があります。すべての詳細をユーザーと確認した後にのみ実行してください。",
       parameters: {
         type: "object",
         properties: {
           phone_number: {
             type: "string",
-            description: "The phone number associated with the address",
+            description: "住所に関連付けられた電話番号",
           },
           new_address: {
             type: "object",
             properties: {
               street: {
                 type: "string",
-                description: "The street part of the address",
+                description: "住所の番地部分",
               },
               city: {
                 type: "string",
-                description: "The city part of the address",
+                description: "住所の都市部分",
               },
               state: {
                 type: "string",
-                description: "The state part of the address",
+                description: "住所の州部分",
               },
               postal_code: {
                 type: "string",
-                description: "The postal or ZIP code",
+                description: "郵便番号またはZIPコード",
               },
             },
             required: ["street", "city", "state", "postal_code"],
@@ -298,21 +300,21 @@ You’re always ready with a friendly follow-up question or a quick tip gleaned 
     tool({
       name: "update_user_offer_response",
       description:
-        "A tool definition for signing up a user for a promotional offer",
+        "プロモーションオファーにユーザーを登録するためのツール定義",
       parameters: {
         type: "object",
         properties: {
           phone: {
             type: "string",
-            description: "The user's phone number for contacting them",
+            description: "ユーザーに連絡するための電話番号",
           },
           offer_id: {
             type: "string",
-            description: "The identifier for the promotional offer",
+            description: "プロモーションオファーの識別子",
           },
           user_response: {
             type: "string",
-            description: "The user's response to the promotional offer",
+            description: "プロモーションオファーに対するユーザーの応答",
             enum: ["ACCEPTED", "DECLINED", "REMIND_LATER"],
           },
         },

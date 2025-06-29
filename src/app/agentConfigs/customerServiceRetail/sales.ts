@@ -4,24 +4,24 @@ export const salesAgent = new RealtimeAgent({
   name: 'salesAgent',
   voice: 'sage',
   handoffDescription:
-    "Handles sales-related inquiries, including new product details, recommendations, promotions, and purchase flows. Should be routed if the user is interested in buying or exploring new offers.",
+    "新製品の詳細、推奨事項、プロモーション、購入フローを含む販売関連の問い合わせを処理します。ユーザーが新しいオファーの購入または探索に興味がある場合にルーティングされるべきです。",
 
   instructions:
-    "You are a helpful sales assistant. Provide comprehensive information about available promotions, current deals, and product recommendations. Help the user with any purchasing inquiries, and guide them through the checkout process when they are ready.",
+    "必ず日本語で応答してください。ユーザーとの会話は全て日本語で行ってください。あなたは親切な販売アシスタントです。利用可能なプロモーション、現在の取引、製品の推奨事項に関する包括的な情報を提供します。購入に関する問い合わせをユーザーに手伝い、準備ができたらチェックアウトプロセスを案内します。",
 
 
   tools: [
     tool({
       name: 'lookupNewSales',
       description:
-        "Checks for current promotions, discounts, or special deals. Respond with available offers relevant to the user’s query.",
+        "現在のプロモーション、割引、または特別オファーを確認します。ユーザーのクエリに関連する利用可能なオファーで応答します。",
       parameters: {
         type: 'object',
         properties: {
           category: {
             type: 'string',
             enum: ['snowboard', 'apparel', 'boots', 'accessories', 'any'],
-            description: 'The product category or general area the user is interested in (optional).',
+            description: 'ユーザーが興味を持っている製品カテゴリまたは一般的な領域（オプション）。',
           },
         },
         required: ['category'],
@@ -52,13 +52,13 @@ export const salesAgent = new RealtimeAgent({
 
     tool({
       name: 'addToCart',
-      description: "Adds an item to the user's shopping cart.",
+      description: "ユーザーのショッピングカートにアイテムを追加します。",
       parameters: {
         type: 'object',
         properties: {
           item_id: {
             type: 'string',
-            description: 'The ID of the item to add to the cart.',
+            description: 'カートに追加するアイテムのID。',
           },
         },
         required: ['item_id'],
@@ -70,20 +70,20 @@ export const salesAgent = new RealtimeAgent({
     tool({
       name: 'checkout',
       description:
-        "Initiates a checkout process with the user's selected items.",
+        "ユーザーが選択したアイテムでチェックアウトプロセスを開始します。",
       parameters: {
         type: 'object',
         properties: {
           item_ids: {
             type: 'array',
-            description: 'An array of item IDs the user intends to purchase.',
+            description: 'ユーザーが購入しようとしているアイテムIDの配列。',
             items: {
               type: 'string',
             },
           },
           phone_number: {
             type: 'string',
-            description: "User's phone number used for verification. Formatted like '(111) 222-3333'",
+            description: "検証に使用されるユーザーの電話番号。'(111) 222-3333' の形式でフォーマットされます。",
             pattern: '^\\(\\d{3}\\) \\d{3}-\\d{4}$',
           },
         },

@@ -8,7 +8,7 @@ export function audioFormatForCodec(codec: string): 'pcm16' | 'g711_ulaw' | 'g71
   return audioFormat;
 }
 
-// Apply preferred codec on a peer connection's audio transceivers. Safe to call multiple times.
+// Peer Connectionのオーディオトランシーバーに優先コーデックを適用します。複数回呼び出しても安全です。
 export function applyCodecPreferences(
   pc: RTCPeerConnection,
   codec: string,
@@ -27,6 +27,6 @@ export function applyCodecPreferences(
       .filter((t) => t.sender && t.sender.track?.kind === 'audio')
       .forEach((t) => t.setCodecPreferences([pref]));
   } catch (err) {
-    console.error('[codecUtils] applyCodecPreferences error', err);
+    console.error('[codecUtils] applyCodecPreferences エラー', err);
   }
 }

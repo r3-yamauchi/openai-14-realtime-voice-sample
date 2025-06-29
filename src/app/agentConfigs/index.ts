@@ -5,7 +5,7 @@ import { workspaceBuilderScenario } from './workspaceBuilder';
 
 import type { RealtimeAgent } from '@openai/agents/realtime';
 
-// Map of scenario key -> array of RealtimeAgent objects
+// シナリオキーと RealtimeAgent オブジェクトの配列のマッピング
 export const allAgentSets: Record<string, RealtimeAgent[]> = {
   workspaceBuilder: workspaceBuilderScenario,
   customerServiceRetail: customerServiceRetailScenario,

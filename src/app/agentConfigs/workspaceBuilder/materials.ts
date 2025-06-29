@@ -4,18 +4,18 @@ import { RealtimeItem, tool } from '@openai/agents/realtime';
 import { fetchResponsesMessage } from '../chatSupervisor/supervisorAgent';
 import { materialsPrompt1 } from './prompts';
 
-// TODO: This could use an MCP connection to search a materials database
+// TODO: これは材料データベースを検索するためにMCP接続を使用できる可能性があります。
 const searchMaterials = tool({
   name: 'searchMaterials',
   description:
-    'Search the materials and supplies database for helpful information.',
+    '役立つ情報を材料および供給データベースで検索します。',
   parameters: {
     type: 'object',
     properties: {
       query: {
         type: 'string',
         description:
-          'A search query to find materials and supplies',
+          '材料と供給品を見つけるための検索クエリ',
       },
     },
     required: ['query'],
@@ -36,13 +36,13 @@ const searchMaterials = tool({
     const body = {
         model: "gpt-4.1",
         tools: [ { type: "web_search_preview" } ],
-        input: `You're a materials and supplies assistant. 
-        Search the web and respond with relevant information based on the Search Query given the conversation history.
+        input: `あなたは材料および供給アシスタントです。
+        会話履歴に基づいて、検索クエリに関連する情報でウェブを検索し、応答してください。
         
-        ==== Recent Conversation History ====
+        ==== 最近の会話履歴 ====
         ${JSON.stringify(filteredLogs, null, 2)}
         
-        ==== Search Query ====
+        ==== 検索クエリ ====
         ${query}`,
     };
 
@@ -50,7 +50,7 @@ const searchMaterials = tool({
     const responseText = response.output_text;
     addBreadcrumb?.('[materials search] response', { responseText });
     if (response.error) {
-      return { error: 'Something went wrong.' };
+      return { error: '何か問題が発生しました。' };
     }
 
     return { webResponse: responseText as string };

@@ -1,29 +1,108 @@
-# Realtime API Agents Build Hours Demo
+# Realtime API Agents Build Hours デモ
 
-This is a demonstration of more advanced patterns for voice agents, using the OpenAI Realtime API and the OpenAI Agents SDK. 
+このプロジェクトは、OpenAI Realtime API と OpenAI Agents SDK を使用した、より高度な音声エージェントのパターンを示すデモンストレーションです。
 
-## About the OpenAI Agents SDK
+## OpenAI Agents SDK について
 
-This project uses the [OpenAI Agents SDK](https://github.com/openai/openai-agents), a toolkit for building, managing, and deploying advanced AI agents. The SDK provides:
+このプロジェクトでは、高度な AI エージェントの構築、管理、デプロイのためのツールキットである [OpenAI Agents SDK](https://github.com/openai/openai-agents) を使用しています。この SDK は以下の機能を提供します。
 
-- A unified interface for defining agent behaviors and tool integrations.
-- Built-in support for agent orchestration, state management, and event handling.
-- Easy integration with the OpenAI Realtime API for low-latency, streaming interactions.
-- Extensible patterns for multi-agent collaboration, handoffs, and tool use.
+- エージェントの動作とツール連携を定義するための統一されたインターフェース。
+- エージェントのオーケストレーション、状態管理、イベント処理に対する組み込みサポート。
+- 低遅延のストリーミング対話のための OpenAI Realtime API との簡単な統合。
+- マルチエージェントの連携、ハンドオフ、ツール使用のための拡張可能なパターン。
 
-For full documentation, guides, and API references, see the official [OpenAI Agents SDK Documentation](https://github.com/openai/openai-agents#readme).
+完全なドキュメント、ガイド、API リファレンスについては、公式の [OpenAI Agents SDK ドキュメント](https://github.com/openai/openai-agents#readme) を参照してください。
 
-**NOTE:** This Build Hours Demo is a fork of the [openai-realtime-agents project](https://github.com/openai/openai-realtime-agents/).
+**注記:** この Build Hours デモは、[openai-realtime-agents プロジェクト](https://github.com/openai/openai-realtime-agents/) のフォークです。
 
+## プロジェクト構造
 
+このプロジェクトはNext.jsアプリケーションとして構成されており、主要な機能は`src/app`ディレクトリ以下に配置されています。
 
-## Setup
+-   `src/app/agentConfigs`: 様々なエージェントの定義と設定が含まれています。各エージェントは独自のロジックとプロンプトを持ち、特定のシナリオに対応します。
+    -   `chatSupervisor`: 会話の監督を行うエージェントの例。
+    -   `customerServiceRetail`: 小売業の顧客サービスエージェントの例。
+    -   `workspaceBuilder`: ワークスペース構築に関するエージェントの例。
+-   `src/app/api`: バックエンドAPIエンドポイントを定義します。主にセッション管理やエージェントとの連携に使用されます。
+-   `src/app/components`: UIコンポーネントが含まれており、エージェントとのインタラクションやトランスクリプト表示などを担当します。
+-   `src/app/contexts`: React Context API を使用して、アプリケーション全体で共有される状態（イベント、トランスクリプト、ワークスペースなど）を管理します。
+-   `src/app/hooks`: カスタムReactフックが含まれており、リアルタイムセッションの管理やオーディオのダウンロードなど、再利用可能なロジックを提供します。
+-   `src/app/lib`: ユーティリティ関数や環境設定など、汎用的なヘルパーコードが含まれています。
 
-- This is a Next.js typescript app. Install dependencies with `npm i`.
-- Add your `OPENAI_API_KEY` to your env. Either add it to your `.bash_profile` or equivalent, or copy `.env.sample` to `.env` and add it there.
-- Start the server with `npm run dev`
-- Open your browser to [http://localhost:3000](http://localhost:3000). It should default to the `workspaceBuilder` Agent Config.
-- You can change examples via the "Scenario" dropdown in the top right.
+## セットアップ
 
-# Agentic Pattern: Responder-Thinker
+-   このプロジェクトは Next.js の TypeScript アプリケーションです。依存関係をインストールするには `npm i` を実行します。
+-   `OPENAI_API_KEY` を環境変数に追加してください。`.bash_profile` または同等のファイルに追加するか、`.env.sample` を `.env` にコピーしてそこに追加してください。
+-   サーバーを起動するには `npm run dev` を実行します。
+-   ブラウザで [http://localhost:3000](http://localhost:3000) を開きます。デフォルトでは `workspaceBuilder` エージェント設定がロードされます。
+-   右上の「Scenario」ドロップダウンから例を変更できます。
+
+## エージェントパターン: Responder-Thinker
+
+<img width="1011" alt="Screenshot 2025-06-17 at 11 38 42 AM" src="https://github.com/user-attachments/assets/192bbd72-80af-4a76-9db1-aca4bbc8b2a4" />
+
+このデモでは、「Responder-Thinker」というエージェントパターンが活用されています。このパターンでは、ユーザーからの入力に対して即座に反応する「Responder」エージェントと、より複雑な思考やツール使用を行う「Thinker」エージェントが連携します。
+
+-   **Responder**: ユーザーの音声入力に対して低遅延で応答を生成し、会話の流れをスムーズに保ちます。
+-   **Thinker**: 会話のコンテキストを深く理解し、必要に応じて外部ツール（API呼び出しなど）を利用して情報を取得したり、複雑なタスクを実行したりします。Thinkerからの結果はResponderに渡され、自然な形でユーザーに伝えられます。
+
+この連携により、ユーザーは途切れることのないリアルタイムな対話体験を得ながら、エージェントはバックグラウンドで複雑な処理を実行できます。
+
+## 主要ライブラリの役割
+
+-   `@openai/agents`: OpenAI Agents SDK の主要ライブラリであり、エージェントの定義、オーケストレーション、状態管理、イベント処理を可能にします。このプロジェクトのエージェントロジックの基盤となっています。
+-   `openai`: OpenAI API とのインタラクションを容易にする公式ライブラリです。主に、音声認識、テキスト生成、ツール呼び出しなどの機能に使用されます。
+
+## 拡張性とカスタマイズ
+
+このデモをベースに、独自のリアルタイム音声エージェントを構築・拡張することが可能です。
+
+-   **新しいエージェントの追加**: `src/app/agentConfigs` ディレクトリ内に新しいファイルを作成し、`AgentConfig` インターフェースを実装することで、独自のシナリオに対応するエージェントを追加できます。
+-   **ツールの統合**: エージェントは `tools` プロパティを通じて外部ツールと連携できます。これにより、データベースの検索、外部APIの呼び出し、特定のタスクの実行など、エージェントの能力を拡張できます。
+-   **UIのカスタマイズ**: `src/app/components` 以下のReactコンポーネントを修正することで、ユーザーインターフェースを自由にカスタマイズできます。
+
+## ユーザーインターフェース機能
+
+アプリケーション最下部には、様々なオプション機能が配置されています：
+
+### 1. Push-to-Talk（Push-to-Talk）
+音声認識の動作モードを切り替えます。
+- **オフ（デフォルト）**: 自動音声認識（VAD - Voice Activity Detection）が有効で、話し始めると自動的に音声を認識します
+- **オン**: 手動モードになり、「話す」ボタンを押している間のみ音声を録音・認識します
+
+### 2. 話す
+Push-to-Talkモード時の音声入力ボタンです。
+- Push-to-Talkが有効な時のみ使用可能
+- ボタンを押している間（マウスダウン/タッチ）のみ音声を録音
+- ボタンを離すと録音終了し、エージェントが応答を生成
+
+### 3. オーディオ再生
+エージェントからの音声応答の再生をコントロールします。
+- **オン（デフォルト）**: エージェントの応答が音声で再生されます
+- **オフ**: 音声を無効にし、テキストのみで応答を確認できます（帯域幅節約、静音環境での使用に便利）
+
+### 4. ログ
+右側の技術ログパネルの表示/非表示を切り替えます。
+- **オン**: WebSocketイベント、API呼び出し、エラー情報などの詳細なログを表示
+- **オフ**: ログパネルを隠してより広い作業スペースを確保
+- 開発者やデバッグ時に有用
+
+### 5. トランスクリプト
+会話履歴パネルの表示/非表示を切り替えます。
+- **オン**: ユーザーとエージェントの会話履歴をテキストで表示
+- **オフ**: トランスクリプトパネルを隠し、ワークスペース（workspaceBuilderシナリオの場合）により多くのスペースを提供
+
+### 6. Codec（コーデック選択）
+音声通信の品質とフォーマットを選択します。
+- **Opus (48 kHz)**: 高品質音声（デフォルト、ブロードバンド）
+- **PCMU/PCMA (8 kHz)**: 低品質音声（電話回線品質をシミュレート）
+- 電話システム経由でのアクセス時の動作をテストするために使用
+
+## トラブルシューティング
+
+-   **`OPENAI_API_KEY` が設定されていない**: 環境変数 `OPENAI_API_KEY` が正しく設定されていることを確認してください。`.env` ファイルを使用している場合は、`npm run dev` を実行する前にファイルが正しく読み込まれているか確認してください。
+-   **エージェントが応答しない**: ネットワーク接続を確認し、OpenAI APIへのリクエストが成功しているか開発者ツール（ブラウザのコンソールやネットワークタブ）で確認してください。エージェントのプロンプトやロジックに問題がないか、`src/app/agentConfigs` 内の関連ファイルを確認してください。
+-   **音声入力が機能しない**: ブラウザのマイクアクセス許可を確認してください。また、システムのマイク設定が正しく行われているか確認してください。
+
+# エージェントパターン: Responder-Thinker
 <img width="1011" alt="Screenshot 2025-06-17 at 11 38 42 AM" src="https://github.com/user-attachments/assets/192bbd72-80af-4a76-9db1-aca4bbc8b2a4" />

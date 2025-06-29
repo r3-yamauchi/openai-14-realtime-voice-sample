@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// Proxy endpoint for the OpenAI Responses API
+// OpenAI Responses API のプロキシエンドポイント
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
@@ -23,8 +23,8 @@ async function structuredResponse(openai: OpenAI, body: any) {
 
     return NextResponse.json(response);
   } catch (err: any) {
-    console.error('responses proxy error', err);
-    return NextResponse.json({ error: 'failed' }, { status: 500 }); 
+    console.error('応答プロキシエラー', err);
+    return NextResponse.json({ error: '失敗しました' }, { status: 500 }); 
   }
 }
 
@@ -37,8 +37,8 @@ async function textResponse(openai: OpenAI, body: any) {
 
     return NextResponse.json(response);
   } catch (err: any) {
-    console.error('responses proxy error', err);
-    return NextResponse.json({ error: 'failed' }, { status: 500 });
+    console.error('応答プロキシエラー', err);
+    return NextResponse.json({ error: '失敗しました' }, { status: 500 });
   }
 }
   

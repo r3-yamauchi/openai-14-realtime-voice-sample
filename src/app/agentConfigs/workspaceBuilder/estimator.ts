@@ -7,14 +7,14 @@ import { estimatorPrompt1 } from './prompts';
 const calculate = tool({
   name: 'calculate',
   description:
-    'Calculate construction costs or construction plan timeline.',
+    '建設費用または建設計画のタイムラインを計算します。',
   parameters: {
     type: 'object',
     properties: {
       data_to_calculate: {
         type: 'string',
         description:
-          'A detailed description of the construction costs or construction plan timeline to calculate.',
+          '計算する建設費用または建設計画のタイムラインの詳細な説明。',
       },
     },
     required: ['data_to_calculate'],
@@ -40,11 +40,11 @@ const calculate = tool({
           container: { type: "auto" }
         }
       ],
-      instructions: "You are a construction budget estimator calculator and timeline planning assistant. When asked a question, write and run code in code interpreter to answer the question.",
-      input: `==== Relevant Conversation History ====
+      instructions: "あなたは建設予算見積もり計算機およびタイムライン計画アシスタントです。質問されたら、コードインタープリターでコードを記述して実行し、質問に答えてください。",
+      input: `==== 関連する会話履歴 ====
       ${JSON.stringify(filteredLogs, null, 2)}
       
-      ==== Requeted Calculation ====
+      ==== 要求された計算 ====
       ${data_to_calculate}`,
     };
 
@@ -55,7 +55,7 @@ const calculate = tool({
     console.log('Response Text:', responseText);
     addBreadcrumb?.('[calculate] response', { responseText });
     if (response.error) {
-      return { error: 'Something went wrong.' };
+      return { error: '何か問題が発生しました。' };
     }
 
     return { calculatorResponse: responseText as string };

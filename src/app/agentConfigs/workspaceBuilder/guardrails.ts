@@ -1,20 +1,24 @@
 import { zodTextFormat } from 'openai/helpers/zod';
 import { GuardrailOutputZod, GuardrailOutput } from '@/app/types';
 
-// Validator that calls the /api/responses endpoint to
-// validates the realtime output according to moderation policies. 
-// This will prevent the realtime model from responding in undesired ways
-// By sending it a corrective message and having it redirect the conversation.
+// ---------------------------------------------------------------------------
+// ワークスペースマネージャーエージェントのプロンプト
+// ---------------------------------------------------------------------------
+
+// /api/responses エンドポイントを呼び出して、
+// モデレーションポリシーに従ってリアルタイム出力を検証するバリデーターです。
+// これにより、リアルタイムモデルが望ましくない方法で応答するのを防ぎ、
+// 修正メッセージを送信して会話をリダイレクトさせることができます。
 export async function runGuardrailClassifier(
   message: string,
 ): Promise<GuardrailOutput> {
   const messages = [
     {
       role: 'user',
-      content: `You are an expert at classifying text according to moderation policies. Consider the provided message, analyze potential classes from output_classes, and output the best classification. Output json, following the provided schema. Keep your analysis and reasoning short and to the point, maximum 2 sentences.
+      content: `あなたはモデレーションポリシーに従ってテキストを分類する専門家です。提供されたメッセージを考慮し、output_classesから潜在的なクラスを分析し、最適な分類を出力してください。提供されたスキーマに従ってJSON形式で出力してください。分析と推論は短く要点をまとめ、最大2文にしてください。
 
       <info>
-        Purpose of the conversation: Discussing a home renovation project.
+        会話の目的: 家のリノベーションプロジェクトについて話し合うこと。
       </info>
 
       <message>
@@ -22,12 +26,12 @@ export async function runGuardrailClassifier(
       </message>
 
       <output_classes>
-      - OFF_TOPIC: Content that is not related to the home renovation project, including the agent discussing their own preferences or opinions.
-      - INAPPROPRIATE: Content that is threatening, offensive, or inappropriate.
-      - NONE: If no other classes are appropriate and the message is fine.
+      - OFF_TOPIC: エージェントが自身の好みや意見を議論することを含め、家のリノベーションプロジェクトに関連しないコンテンツ。
+      - INAPPROPRIATE: 脅迫的、攻撃的、または不適切なコンテンツ。
+      - NONE: 他のどのクラスにも該当せず、メッセージが問題ない場合。
       </output_classes>
       `,
-    },
+    },,
   ];
 
   const response = await fetch('/api/responses', {
@@ -45,8 +49,8 @@ export async function runGuardrailClassifier(
   });
 
   if (!response.ok) {
-    console.warn('Server returned an error:', response);
-    return Promise.reject('Error with runGuardrailClassifier.');
+    console.warn('サーバーがエラーを返しました:', response);
+    return Promise.reject('runGuardrailClassifierでエラーが発生しました。');
   }
 
   const data = await response.json();
@@ -58,8 +62,8 @@ export async function runGuardrailClassifier(
       testText: message,
     };
   } catch (error) {
-    console.error('Error parsing the message content as GuardrailOutput:', error);
-    return Promise.reject('Failed to parse guardrail output.');
+    console.error('GuardrailOutputとしてメッセージコンテンツをパース中にエラーが発生しました:', error);
+    return Promise.reject('ガードレール出力のパースに失敗しました。');
   }
 }
 
@@ -89,7 +93,7 @@ export function createDesignGuardrail() {
       } catch {
         return {
           tripwireTriggered: false,
-          outputInfo: { error: 'guardrail_failed' },
+          outputInfo: { error: 'ガードレール失敗' },
         };
       }
     },

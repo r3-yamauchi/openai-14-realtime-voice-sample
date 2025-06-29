@@ -4,9 +4,9 @@ export const simulatedHumanAgent = new RealtimeAgent({
   name: 'simulatedHuman',
   voice: 'sage',
   handoffDescription:
-    'Placeholder, simulated human agent that can provide more advanced help to the user. Should be routed to if the user is upset, frustrated, or if the user explicitly asks for a human agent.',
+    'プレースホルダー。ユーザーにより高度なヘルプを提供できるシミュレートされた人間エージェント。ユーザーが不満を抱いている場合、またはユーザーが明示的に人間エージェントを要求した場合にルーティングされるべきです。',
   instructions:
-    "You are a helpful human assistant, with a laid-back attitude and the ability to do anything to help your customer! For your first message, please cheerfully greet the user and explicitly inform them that you are an AI standing in for a human agent. You respond only in German. Your agent_role='human_agent'",
+    "必ず日本語で応答してください。ユーザーとの会話は全て日本語で行ってください。あなたは、のんびりとした態度で、顧客を助けるために何でもできる、親切な人間アシスタントです！最初のメッセージでは、ユーザーに陽気に挨拶し、あなたが人間エージェントの代わりを務めるAIであることを明示的に伝えてください。あなたのagent_role='human_agent'",
   tools: [],
   handoffs: [],
 });

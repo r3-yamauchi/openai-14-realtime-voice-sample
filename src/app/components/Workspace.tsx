@@ -5,13 +5,13 @@ import Sidebar from "@/app/components/workspace/Sidebar";
 import TabContent from "@/app/components/workspace/TabContent";
 import { useWorkspaceContext, WorkspaceState } from "@/app/contexts/WorkspaceContext";
 
-// Container panel rendered when the workspaceBuilder scenario is active.
-// Combines the Sidebar (tab list) and TabContent(renderer) components.
+// ワークスペースビルダーシナリオがアクティブなときにレンダリングされるコンテナパネル。
+// サイドバー（タブリスト）とTabContent（レンダラー）コンポーネントを組み合わせます。
 
 function Workspace() {
-  // Extract data + mutators from the Zustand store.
-  // Stable selectors avoid triggering the subscription effect on every render
-  // (because arrow functions create a new function each time).
+  // Zustandストアからデータとミューテーターを抽出します。
+  // 安定したセレクターは、すべてのレンダリングでサブスクリプション効果をトリガーするのを防ぎます
+  // （アロー関数は毎回新しい関数を作成するため）。
   const selectTabs = React.useCallback((s: WorkspaceState) => s.tabs, []);
   const selectSelectedTabId = React.useCallback((s: WorkspaceState) => s.selectedTabId, []);
   const selectAddTab = React.useCallback((s: WorkspaceState) => s.addTab, []);
@@ -27,10 +27,8 @@ function Workspace() {
   const deleteTab = useWorkspaceContext(selectDeleteTab);
   const setSelectedTabId = useWorkspaceContext(selectSetSelectedTabId);
 
-  // Ensure a default tab exists and a valid tab is always selected. Performing
-  // this in a `useEffect` keeps state changes out of the render phase and
-  // prevents React warnings about cascading updates between parent/child
-  // components.
+  // デフォルトのタブが存在し、常に有効なタブが選択されていることを確認します。これを`useEffect`で実行すると、
+  // 状態の変更がレンダリングフェーズから外れ、親/子コンポーネント間のカスケード更新に関するReactの警告を防ぎます。
   React.useEffect(() => {
     if (tabs.length === 0) {
       addTab();
@@ -49,14 +47,14 @@ function Workspace() {
 
   return (
     <div className="w-full flex flex-col bg-white rounded-xl overflow-hidden">
-      {/* Header */}
+      {/* ヘッダー */}
       <div className="flex items-center justify-between px-6 py-3 sticky top-0 z-10 text-base border-b bg-white rounded-t-xl">
-        <span className="font-semibold">Workspace</span>
+        <span className="font-semibold">ワークスペース</span>
       </div>
 
-      {/* Content area split between sidebar + tab content */}
+      {/* サイドバー + タブコンテンツ間で分割されたコンテンツ領域 */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
-        {/* Sidebar (tab list) */}
+        {/* サイドバー（タブリスト） */}
         <div className="w-48 border-r border-gray-200 dark:border-neutral-800 overflow-y-auto">
           <Sidebar
             tabs={tabs}
@@ -68,7 +66,7 @@ function Workspace() {
           />
         </div>
 
-        {/* Tab content */}
+        {/* タブコンテンツ */}
         <div className="flex-1 overflow-auto p-4">
           <TabContent tab={selectedTab} />
         </div>

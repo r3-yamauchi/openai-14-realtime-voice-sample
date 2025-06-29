@@ -34,6 +34,7 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
     (s: SessionStatus) => {
       setStatus(s);
       callbacks.onConnectionChange?.(s);
+      // クライアントイベントをログに記録
       logClientEvent({}, s);
     },
     [callbacks],
@@ -44,7 +45,7 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
   const historyHandlers = useHandleSessionHistory().current;
 
   function handleTransportEvent(event: any) {
-    // Handle additional server events that aren't managed by the session
+    // セッションで管理されていない追加のサーバーイベントを処理します
     switch (event.type) {
       case "conversation.item.input_audio_transcription.completed": {
         historyHandlers.handleTranscriptionCompleted(event);
@@ -72,7 +73,7 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
       .toLowerCase(),
   );
 
-  // Wrapper to pass current codec param
+  // 現在のコーデックパラメータを渡すためのラッパー
   const applyCodec = useCallback(
     (pc: RTCPeerConnection) => applyCodecPreferences(pc, codecParamRef.current),
     [],
@@ -87,7 +88,7 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
 
   useEffect(() => {
     if (sessionRef.current) {
-      // Log server errors
+      // サーバーエラーをログに記録
       sessionRef.current.on("error", (...args: any[]) => {
         logServerEvent({
           type: "error",
@@ -95,7 +96,7 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
         });
       });
 
-      // history events
+      // 履歴イベント
       sessionRef.current.on("agent_handoff", handleAgentHandoff);
       sessionRef.current.on("agent_tool_start", historyHandlers.handleAgentToolStart);
       sessionRef.current.on("agent_tool_end", historyHandlers.handleAgentToolEnd);
@@ -103,7 +104,7 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
       sessionRef.current.on("history_added", historyHandlers.handleHistoryAdded);
       sessionRef.current.on("guardrail_tripped", historyHandlers.handleGuardrailTripped);
 
-      // additional transport events
+      // 追加のトランスポートイベント
       sessionRef.current.on("transport_event", handleTransportEvent);
     }
   }, [sessionRef.current]);
@@ -116,22 +117,22 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
       extraContext,
       outputGuardrails,
     }: ConnectOptions) => {
-      if (sessionRef.current) return; // already connected
+      if (sessionRef.current) return; // すでに接続済み
 
       updateStatus('CONNECTING');
 
       const ek = await getEphemeralKey();
       const rootAgent = initialAgents[0];
 
-      // This lets you use the codec selector in the UI to force narrow-band (8 kHz) codecs to
-      //  simulate how the voice agent sounds over a PSTN/SIP phone call.
+      // これにより、UIのコーデックセレクターを使用して、ナローバンド（8 kHz）コーデックを強制的に使用し、
+      // PSTN/SIP電話での音声エージェントの音声をシミュレートできます。
       const codecParam = codecParamRef.current;
       const audioFormat = audioFormatForCodec(codecParam);
 
       sessionRef.current = new RealtimeSession(rootAgent, {
         transport: new OpenAIRealtimeWebRTC({
           audioElement,
-          // Set preferred codec before offer creation
+          // オファー作成前に優先コーデックを設定
           changePeerConnection: async (pc: RTCPeerConnection) => {
             applyCodec(pc);
             return pc;
@@ -143,6 +144,7 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
           outputAudioFormat: audioFormat,
           inputAudioTranscription: {
             model: 'whisper-1',
+            language: 'ja',
           },
         },
         outputGuardrails: outputGuardrails ?? [],
@@ -162,10 +164,10 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
   }, [updateStatus]);
 
   const assertconnected = () => {
-    if (!sessionRef.current) throw new Error('RealtimeSession not connected');
+    if (!sessionRef.current) throw new Error('RealtimeSessionが接続されていません');
   };
 
-  /* ----------------------- message helpers ------------------------- */
+  /* ----------------------- メッセージヘルパー ------------------------- */
 
   const interrupt = useCallback(() => {
     sessionRef.current?.interrupt();

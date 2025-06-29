@@ -25,7 +25,7 @@ export function GuardrailChip({
 }) {
   const [expanded, setExpanded] = useState(false);
 
-  // Consolidate state into a single variable: "PENDING", "PASS", or "FAIL"
+  // 状態を単一の変数に統合: "PENDING"、"PASS"、または "FAIL"
   const state =
     guardrailResult.status === "IN_PROGRESS"
       ? "PENDING"
@@ -33,29 +33,29 @@ export function GuardrailChip({
       ? "PASS"
       : "FAIL";
 
-  // Variables for icon, label, and styling classes based on state
+  // 状態に基づくアイコン、ラベル、スタイリングクラスの変数
   let IconComponent;
   let label: string;
   let textColorClass: string;
   switch (state) {
     case "PENDING":
       IconComponent = ClockIcon;
-      label = "Pending";
+      label = "保留中";
       textColorClass = "text-gray-600";
       break;
     case "PASS":
       IconComponent = CheckCircledIcon;
-      label = "Pass";
+      label = "合格";
       textColorClass = "text-green-600";
       break;
     case "FAIL":
       IconComponent = CrossCircledIcon;
-      label = "Fail";
+      label = "失敗";
       textColorClass = "text-red-500";
       break;
     default:
       IconComponent = ClockIcon;
-      label = "Pending";
+      label = "保留中";
       textColorClass = "text-gray-600";
   }
 
@@ -63,22 +63,22 @@ export function GuardrailChip({
     <div className="text-xs">
       <div
         onClick={() => {
-          // Only allow toggling the expanded state for PASS/FAIL cases.
+          // PASS/FAILの場合のみ展開状態の切り替えを許可
           if (state !== "PENDING") {
             setExpanded(!expanded);
           }
         }}
-        // Only add pointer cursor if clickable (PASS or FAIL state)
+        // クリック可能な場合（PASSまたはFAIL状態）にのみポインターカーソルを追加
         className={`inline-flex items-center gap-1 rounded ${
           state !== "PENDING" ? "cursor-pointer" : ""
         }`}
       >
-        Guardrail:
+        ガードレール:
         <div className={`flex items-center gap-1 ${textColorClass}`}>
           <IconComponent /> {label}
         </div>
       </div>
-      {/* Container for expandable content */}
+      {/* 展開可能なコンテンツのコンテナ */}
       {state !== "PENDING" && guardrailResult.category && guardrailResult.rationale && (
         <div
           className={`overflow-hidden transition-all duration-300 ${
@@ -87,7 +87,7 @@ export function GuardrailChip({
         >
           <div className="pt-2 text-xs">
             <strong>
-              Moderation Category: {formatCategory(guardrailResult.category)}
+              モデレーションカテゴリ: {formatCategory(guardrailResult.category)}
             </strong>
             <div>{guardrailResult.rationale}</div>
             {guardrailResult.testText && (

@@ -15,7 +15,7 @@ export function useHandleSessionHistory() {
 
   const { logServerEvent } = useEvent();
 
-  /* ----------------------- helpers ------------------------- */
+  /* ----------------------- ヘルパー ------------------------- */
 
   const extractMessageText = (content: any[] = []): string => {
     if (!Array.isArray(content)) return "";
@@ -41,7 +41,7 @@ export function useHandleSessionHistory() {
       try {
         return JSON.parse(val);
       } catch {
-        console.warn('Failed to parse JSON:', val);
+        console.warn('JSONのパースに失敗しました:', val);
         return val;
       }
     }
@@ -60,12 +60,12 @@ export function useHandleSessionHistory() {
     if ('result' in obj) return extractModeration(obj.result);
   };
 
-  // Temporary helper until the guardrail_tripped event includes the itemId in the next version of the SDK
+  // ガードレールがトリップされたイベントがSDKの次のバージョンでitemIdを含むまでの一時的なヘルパー
   const sketchilyDetectGuardrailMessage = (text: string) => {
     return text.match(/Failure Details: (\{.*?\})/)?.[1];
   };
 
-  /* ----------------------- event handlers ------------------------- */
+  /* ----------------------- イベントハンドラ ------------------------- */
 
   function handleAgentToolStart(details: any, _agent: any, functionCall: any) {
     const lastFunctionCall = extractFunctionCallByName(functionCall.name, details?.context?.history);
@@ -95,15 +95,15 @@ export function useHandleSessionHistory() {
       let text = extractMessageText(content);
 
       if (isUser && !text) {
-        text = "[Transcribing...]";
+        text = "[文字起こし中...]" ;
       }
 
-      // If the guardrail has been tripped, this message is a message that gets sent to the 
-      // assistant to correct it, so we add it as a breadcrumb instead of a message.
+      // ガードレールがトリップされた場合、このメッセージはアシスタントに修正を指示するために送信されるメッセージであるため、
+      // メッセージの代わりにブレッドクラムとして追加します。
       const guardrailMessage = sketchilyDetectGuardrailMessage(text);
       if (guardrailMessage) {
         const failureDetails = JSON.parse(guardrailMessage);
-        addTranscriptBreadcrumb('Output Guardrail Active', { details: failureDetails });
+        addTranscriptBreadcrumb('出力ガードレールがアクティブ', { details: failureDetails });
       } else {
         addTranscriptMessage(itemId, role, text);
       }
@@ -134,20 +134,20 @@ export function useHandleSessionHistory() {
   }
 
   function handleTranscriptionCompleted(item: any) {
-    // History updates don't reliably end in a completed item, 
-    // so we need to handle finishing up when the transcription is completed.
+    // 履歴の更新は完了したアイテムで確実に終了しないため、
+    // 文字起こしが完了したときに終了処理を行う必要があります。
     const itemId = item.item_id;
     const finalTranscript =
         !item.transcript || item.transcript === "\n"
-        ? "[inaudible]"
+        ? "[聞き取れません]"
         : item.transcript;
     if (itemId) {
       updateTranscriptMessage(itemId, finalTranscript, false);
-      // Use the ref to get the latest transcriptItems
+      // 最新のtranscriptItemsを取得するためにrefを使用します
       const transcriptItem = transcriptItems.find((i) => i.itemId === itemId);
       updateTranscriptItem(itemId, { status: 'DONE' });
 
-      // If guardrailResult still pending, mark PASS.
+      // ガードレール結果がまだ保留中の場合、PASSとマークします。
       if (transcriptItem?.guardrailResult?.status === 'IN_PROGRESS') {
         updateTranscriptItem(itemId, {
           guardrailResult: {

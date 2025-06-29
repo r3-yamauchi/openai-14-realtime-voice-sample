@@ -5,23 +5,23 @@ import { v4 as uuidv4 } from "uuid";
 
 import Image from "next/image";
 
-// UI components
+// UI コンポーネント
 import Transcript from "./components/Transcript";
 import Events from "./components/Events";
 import BottomToolbar from "./components/BottomToolbar";
 import Workspace from "./components/Workspace";
 
-// Types
+// 型定義
 import { SessionStatus } from "@/app/types";
 import type { RealtimeAgent, RealtimeOutputGuardrail } from '@openai/agents/realtime';
 
-// Context providers & hooks
+// コンテキストプロバイダーとフック
 import { useTranscript } from "@/app/contexts/TranscriptContext";
 import { useEvent } from "@/app/contexts/EventContext";
 import { useRealtimeSession } from "./hooks/useRealtimeSession";
 import { createModerationGuardrail } from "@/app/agentConfigs/guardrails";
 
-// Agent configs
+// エージェント設定
 import { allAgentSets, defaultAgentSetKey } from "@/app/agentConfigs";
 import { customerServiceRetailScenario } from "@/app/agentConfigs/customerServiceRetail";
 import { chatSupervisorScenario } from "@/app/agentConfigs/chatSupervisor";
@@ -30,7 +30,7 @@ import { chatSupervisorCompanyName } from "@/app/agentConfigs/chatSupervisor";
 import { simpleHandoffScenario } from "@/app/agentConfigs/simpleHandoff";
 import { workspaceBuilderScenario } from "@/app/agentConfigs/workspaceBuilder";
 
-// Map used by connect logic for scenarios defined via the SDK.
+// SDK で定義されたシナリオの接続ロジックで使用されるマップ。
 const sdkScenarioMap: Record<string, RealtimeAgent[]> = {
   workspaceBuilder: workspaceBuilderScenario,
   customerServiceRetail: customerServiceRetailScenario,
@@ -47,19 +47,18 @@ function App() {
   const searchParams = useSearchParams()!;
 
   // ---------------------------------------------------------------------
-  // Codec selector – lets you toggle between wide-band Opus (48 kHz)
-  // and narrow-band PCMU/PCMA (8 kHz) to hear what the agent sounds like on
-  // a traditional phone line and to validate ASR / VAD behaviour under that
-  // constraint.
+  // コーデックセレクター – 広帯域 Opus (48 kHz) と
+  // 狭帯域 PCMU/PCMA (8 kHz) を切り替えることで、エージェントが従来の電話回線でどのように聞こえるか、
+  // およびその制約下での ASR / VAD の動作を検証できます。
   //
-  // We read the `?codec=` query-param and rely on the `changePeerConnection`
-  // hook (configured in `useRealtimeSession`) to set the preferred codec
-  // before the offer/answer negotiation.
+  // `?codec=` クエリパラメータを読み取り、`changePeerConnection` フック
+  // (`useRealtimeSession` で設定) を使用して、オファー/アンサーネゴシエーションの前に
+  // 優先コーデックを設定します。
   // ---------------------------------------------------------------------
   const urlCodec = searchParams.get("codec") || "opus";
 
-  // Agents SDK doesn't currently support codec selection so it is now forced 
-  // via global codecPatch at module load 
+  // Agents SDK は現在コーデック選択をサポートしていないため、
+  // モジュールロード時にグローバルな codecPatch を介して強制されます。 
 
   const {
     addTranscriptMessage,
@@ -73,7 +72,7 @@ function App() {
   >(null);
 
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
-  // Ref to identify whether the latest agent switch came from an automatic handoff
+  // 最新のエージェント切り替えが自動ハンドオフによるものかどうかを識別するための参照
   const handoffTriggeredRef = useRef(false);
 
   const sdkAudioElement = React.useMemo(() => {
@@ -85,7 +84,7 @@ function App() {
     return el;
   }, []);
 
-  // Attach SDK audio element once it exists (after first render in browser)
+  // SDK オーディオ要素が存在するようになったら (ブラウザでの初回レンダリング後) 接続する
   useEffect(() => {
     if (sdkAudioElement && !audioElementRef.current) {
       audioElementRef.current = sdkAudioElement;
@@ -123,7 +122,7 @@ function App() {
     },
   );
 
-  // Initialize the recording hook.
+  // 録音フックを初期化します。
   const { startRecording, stopRecording, downloadRecording } =
     useAudioDownload();
 
@@ -172,7 +171,7 @@ function App() {
       );
       addTranscriptBreadcrumb(`Agent: ${selectedAgentName}`, currentAgent);
       updateSession(!handoffTriggeredRef.current);
-      // Reset flag after handling so subsequent effects behave normally
+      // 処理後にフラグをリセットし、後続の副作用が正常に動作するようにする
       handoffTriggeredRef.current = false;
     }
   }, [selectedAgentConfigSet, selectedAgentName, sessionStatus]);
@@ -209,13 +208,13 @@ function App() {
         const EPHEMERAL_KEY = await fetchEphemeralKey();
         if (!EPHEMERAL_KEY) return;
 
-        // Ensure the selectedAgentName is first so that it becomes the root
-        const reorderedAgents = [...sdkScenarioMap[agentSetKey]];
-        const idx = reorderedAgents.findIndex((a) => a.name === selectedAgentName);
-        if (idx > 0) {
-          const [agent] = reorderedAgents.splice(idx, 1);
-          reorderedAgents.unshift(agent);
-        }
+        // 選択されたエージェント名が最初になるようにして、それがルートになるようにする
+    const reorderedAgents = [...sdkScenarioMap[agentSetKey]];
+    const idx = reorderedAgents.findIndex((a) => a.name === selectedAgentName);
+    if (idx > 0) {
+      const [agent] = reorderedAgents.splice(idx, 1);
+      reorderedAgents.unshift(agent);
+    }
 
         let guardrails = undefined;
         switch (agentSetKey) {
@@ -270,16 +269,16 @@ function App() {
   };
 
   const updateSession = (shouldTriggerResponse: boolean = false) => {
-    // Reflect Push-to-Talk UI state by (de)activating server VAD on the
-    // backend. The Realtime SDK supports live session updates via the
-    // `session.update` event.
+    // バックエンドでサーバー VAD を (非) アクティブ化することで、
+    // Push-to-Talk UI の状態を反映します。
+    // Realtime SDK は `session.update` イベントを介したライブセッション更新をサポートしています。
     const turnDetection = isPTTActive
       ? null
       : {
           type: 'server_vad',
-          threshold: 0.9,
-          prefix_padding_ms: 300,
-          silence_duration_ms: 500,
+          threshold: 0.7,
+          prefix_padding_ms: 500,
+          silence_duration_ms: 800,
           create_response: true,
         };
 
@@ -290,9 +289,9 @@ function App() {
       },
     });
 
-    // Send an initial 'hi' message to trigger the agent to greet the user
+    // エージェントがユーザーに挨拶するのをトリガーするために、最初の「こんにちは」メッセージを送信します。
     if (shouldTriggerResponse) {
-      sendSimulatedUserMessage('hi');
+      sendSimulatedUserMessage('こんにちは');
     }
   }
 
@@ -316,7 +315,7 @@ function App() {
     setIsPTTUserSpeaking(true);
     sendClientEvent({ type: 'input_audio_buffer.clear' }, 'clear PTT buffer');
 
-    // No placeholder; we'll rely on server transcript once ready.
+    // プレースホルダーなし。準備ができたらサーバーのトランスクリプトに依存します。
   };
 
   const handleTalkButtonUp = () => {
@@ -348,14 +347,13 @@ function App() {
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const newAgentName = e.target.value;
-    // Reconnect session with the newly selected agent as root so that tool
-    // execution works correctly.
+    // ツール実行が正しく機能するように、新しく選択されたエージェントをルートとしてセッションを再接続します。
     disconnectFromRealtime();
     setSelectedAgentName(newAgentName);
-    // connectToRealtime will be triggered by effect watching selectedAgentName
+    // connectToRealtime は selectedAgentName を監視するエフェクトによってトリガーされます。
   };
 
-  // Because we need a new connection, refresh the page when codec changes
+  // 新しい接続が必要なため、コーデックが変更されたらページをリフレッシュします。
   const handleCodecChange = (newCodec: string) => {
     const url = new URL(window.location.toString());
     url.searchParams.set("codec", newCodec);
@@ -402,41 +400,39 @@ function App() {
           console.warn("Autoplay may be blocked by browser:", err);
         });
       } else {
-        // Mute and pause to avoid brief audio blips before pause takes effect.
+        // ポーズが有効になる前の短い音声の途切れを避けるため、ミュートして一時停止します。
         audioElementRef.current.muted = true;
         audioElementRef.current.pause();
       }
     }
 
-    // Toggle server-side audio stream mute so bandwidth is saved when the
-    // user disables playback. 
+    // ユーザーが再生を無効にしたときに帯域幅を節約するために、サーバー側のオーディオストリームのミュートを切り替えます。
     try {
       mute(!isAudioPlaybackEnabled);
     } catch (err) {
-      console.warn('Failed to toggle SDK mute', err);
+      console.warn('SDK ミュートの切り替えに失敗しました', err);
     }
   }, [isAudioPlaybackEnabled]);
 
-  // Ensure mute state is propagated to transport right after we connect or
-  // whenever the SDK client reference becomes available.
+  // 接続後、または SDK クライアント参照が利用可能になったときに、ミュート状態がトランスポートに伝播されるようにします。
   useEffect(() => {
     if (sessionStatus === 'CONNECTED') {
       try {
         mute(!isAudioPlaybackEnabled);
       } catch (err) {
-        console.warn('mute sync after connect failed', err);
+        console.warn('接続後のミュート同期に失敗しました', err);
       }
     }
   }, [sessionStatus, isAudioPlaybackEnabled]);
 
   useEffect(() => {
     if (sessionStatus === "CONNECTED" && audioElementRef.current?.srcObject) {
-      // The remote audio stream from the audio element.
+      // オーディオ要素からのリモートオーディオストリーム。
       const remoteStream = audioElementRef.current.srcObject as MediaStream;
       startRecording(remoteStream);
     }
 
-    // Clean up on unmount or when sessionStatus is updated.
+    // アンマウント時または sessionStatus が更新されたときにクリーンアップします。
     return () => {
       stopRecording();
     };

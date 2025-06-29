@@ -11,13 +11,13 @@ import {
 import { workspaceManagerPrompt1, workspaceManagerPrompt2 } from './prompts';
 
 // ---------------------------------------------------------------------------
-// Workspace tools – these allow the agent to mutate the workspace state
+// ワークスペースツール – これらはエージェントがワークスペースの状態を変更できるようにします
 // ---------------------------------------------------------------------------
 
-// Info only tool for agents to use to get the current state of the workspace
+// エージェントがワークスペースの現在の状態を取得するために使用する情報のみのツール
 export const workspaceInfoTool = tool({
   name: 'get_workspace_info',
-  description: 'Get the current state of the workspace',
+  description: 'ワークスペースの現在の状態を取得します',
   parameters: {
     type: 'object',
     properties: {},
@@ -30,21 +30,21 @@ export const workspaceInfoTool = tool({
 export const workspaceTools = [
   tool({
     name: 'add_workspace_tab',
-    description: 'Add a new tab to the workspace',
+    description: 'ワークスペースに新しいタブを追加します',
     parameters: {
       type: 'object',
       properties: {
         name: {
           type: 'string',
-          description: 'The name of the tab',
+          description: 'タブの名前',
         },
         type: {
           type: 'string',
-          description: "The type of the tab (e.g., 'markdown', 'code', etc.)",
+          description: "タブのタイプ（例：'markdown'、'code'など）",
         },
         content: {
           type: 'string',
-          description: 'The content of the tab to add',
+          description: '追加するタブのコンテンツ',
         },
       },
       required: ['name', 'type'],
@@ -54,17 +54,17 @@ export const workspaceTools = [
   }),
   tool({
     name: 'set_selected_tab_id',
-    description: 'Set the currently selected tab in the workspace',
+    description: 'ワークスペースで現在選択されているタブを設定します',
     parameters: {
       type: 'object',
       properties: {
         index: {
           type: 'integer',
-          description: '0-based position of the tab in the workspace',
+          description: 'ワークスペース内のタブの0ベースの位置',
         },
         name: {
           type: 'string',
-          description: 'The name of the tab to select',
+          description: '選択するタブの名前',
         },
       },
       required: ['index', 'name'],
@@ -74,24 +74,24 @@ export const workspaceTools = [
   }),
   tool({
     name: 'rename_workspace_tab',
-    description: 'Rename an existing workspace tab',
+    description: '既存のワークスペースタブの名前を変更します',
     parameters: {
       type: 'object',
       properties: {
         index: {
           type: 'integer',
           nullable: true,
-          description: '0-based position of the tab in the workspace (optional - you can use id or current_name instead; set to null if unused)',
+          description: 'ワークスペース内のタブの0ベースの位置（オプション - idまたはcurrent_nameを使用できます。未使用の場合はnullに設定してください）',
           minimum: 0,
         },
         current_name: {
           type: 'string',
           nullable: true,
-          description: 'The current name of the tab (optional - you can use id or index instead; set to null if unused)',
+          description: 'タブの現在の名前（オプション - idまたはindexを使用できます。未使用の場合はnullに設定してください）',
         },
         new_name: {
           type: 'string',
-          description: 'The new name for the tab',
+          description: 'タブの新しい名前',
         },
       },
       required: ['current_name', 'new_name'],
@@ -101,20 +101,20 @@ export const workspaceTools = [
   }),
   tool({
     name: 'delete_workspace_tab',
-    description: 'Delete a workspace tab',
+    description: 'ワークスペースタブを削除します',
     parameters: {
       type: 'object',
       properties: {
         index: {
           type: 'integer',
           nullable: true,
-          description: '0-based position of the tab (optional – you can use id or name instead; set to null if unused)',
+          description: 'タブの0ベースの位置（オプション – idまたはnameを使用できます。未使用の場合はnullに設定してください）',
           minimum: 0,
         },
         name: {
           type: 'string',
           nullable: true,
-          description: 'The name of the tab (optional – you can use id or index instead; set to null if unused)',
+          description: 'タブの名前（オプション – idまたはindexを使用できます。未使用の場合はnullに設定してください）',
         },
       },
       required: [],
@@ -124,24 +124,24 @@ export const workspaceTools = [
   }),
   tool({
     name: 'set_tab_content',
-    description: 'Set the content of a workspace tab (pipe-delimited CSV or markdown depending on tab type)',
+    description: 'ワークスペースタブのコンテンツを設定します（タブのタイプに応じてパイプ区切りのCSVまたはMarkdown）',
     parameters: {
       type: 'object',
       properties: {
         index: {
           type: 'integer',
           nullable: true,
-          description: '0-based position of the tab (optional – you can use id or name instead; set to null if unused)',
+          description: 'タブの0ベースの位置（オプション – idまたはnameを使用できます。未使用の場合はnullに設定してください）',
           minimum: 0,
         },
         name: {
           type: 'string',
           nullable: true,
-          description: 'The name of the tab (optional – you can use id or index instead; set to null if unused)',
+          description: 'タブの名前（オプション – idまたはindexを使用できます。未使用の場合はnullに設定してください）',
         },
         content: {
           type: 'string',
-          description: 'The content for the tab (pipe-delimited CSV or markdown)',
+          description: 'タブのコンテンツ（パイプ区切りのCSVまたはMarkdown）',
         },
       },
       required: ['content'],
@@ -197,11 +197,11 @@ async function handleToolCalls(
 
     const outputItems: any[] = currentResponse.output ?? [];
 
-    // Gather all function calls in the output.
+    // 出力内のすべての関数呼び出しを収集します。
     const functionCalls = outputItems.filter((item) => item.type === 'function_call');
 
     if (functionCalls.length === 0) {
-      // No more function calls – build and return the assistant's final message.
+      // これ以上関数呼び出しがない場合 - アシスタントの最終メッセージを構築して返します。
       const assistantMessages = outputItems.filter((item) => item.type === 'message');
 
       const finalText = assistantMessages
@@ -217,14 +217,14 @@ async function handleToolCalls(
       return finalText;
     }
 
-    // For each function call returned by the supervisor model, execute it locally and append its
-    // output to the request body as a `function_call_output` item.
+    // スーパーバイザーモデルから返された各関数呼び出しについて、それをローカルで実行し、その出力を
+    // `function_call_output` アイテムとしてリクエストボディに追加します。
     for (const toolCall of functionCalls) {
       const fName = toolCall.name;
       const args = JSON.parse(toolCall.arguments || '{}');
       const toolRes = await getToolResponse(fName, args);
 
-      // Since we're using a local function, we don't need to add our own breadcrumbs
+      // ローカル関数を使用しているため、独自のブレッドクラムを追加する必要はありません
       if (addBreadcrumb) {
         addBreadcrumb(`[workspaceManager] function call: ${fName}`, args);
       }
@@ -232,7 +232,7 @@ async function handleToolCalls(
         addBreadcrumb(`[workspaceManager] function call result: ${fName}`, toolRes);
       }
 
-      // Add function call and result to the request body to send back to realtime
+      // 関数呼び出しと結果をリアルタイムに送り返すためにリクエストボディに追加します
       body.input.push(
         {
           type: 'function_call',
@@ -248,29 +248,29 @@ async function handleToolCalls(
       );
     }
 
-    // Make the follow-up request including the tool outputs.
+    // ツール出力を含むフォローアップリクエストを行います。
     currentResponse = await fetchResponsesMessage(body);
   }
 }
 
-// Server-side tool for making workspace changes 
-// Used to give workspace change capabilities to other agents
-// without having to hand off to the workspace manager
+// ワークスペースの変更を行うためのサーバーサイドツール
+// ワークスペースマネージャーに引き渡すことなく
+// 他のエージェントにワークスペース変更機能を与えるために使用されます
 export const makeWorkspaceChanges = tool({
   name: 'makeWorkspaceChanges',
   description:
-    'Make changes to the workspace tabs or content.',
+    'ワークスペースのタブまたはコンテンツに変更を加えます。',
   parameters: {
     type: 'object',
     properties: {
       tabsToChange: {
         type: 'string',
-        description: 'A list of the tab(s) to make changes to',
+        description: '変更するタブのリスト',
       },
       workspaceChangesToMake: {
         type: 'string',
         description:
-          'A description of the changes to make to the workspace tabs or content. ALWAYS tell the user that you are updating the workspace when you call this tool..',
+          'ワークスペースのタブまたはコンテンツに行う変更の説明。このツールを呼び出すときは、常にワークスペースを更新していることをユーザーに伝えてください。',
       },
     },
     required: ['tabsToChange', 'workspaceChangesToMake'],
@@ -294,28 +294,28 @@ export const makeWorkspaceChanges = tool({
         {
           type: 'message',
           role: 'system',
-          content: `You are a workspace builder assistant, use the tools below to make changes to the workspace based on the changes requested. 
-          Before making changes like adding new tabs, check the current state to see if there is a tab that already exists for the same purpose. 
-          Use the conversation history for context. 
-          - first find the tab by name, then make the changes. 
-          - if a matching tab is not found, create a new tab with the name provided.
+          content: `あなたはワークスペースビルダーアシスタントです。要求された変更に基づいてワークスペースに変更を加えるために以下のツールを使用してください。
+          新しいタブを追加するなどの変更を行う前に、同じ目的のタブが既に存在するかどうか現在の状態を確認してください。
+          コンテキストのために会話履歴を使用してください。
+          - まず名前でタブを見つけ、次に変更を加えます。
+          - 一致するタブが見つからない場合は、提供された名前で新しいタブを作成します。
           
-          # IMPORTANT
-          Pay attention to tabsToChange and only make workspaceChangesToMake changes to the tabs requested 
-          Do not make any embellishments or additions past what is requested.`,
+          # 重要
+          tabsToChangeに注意を払い、要求されたタブにのみworkspaceChangesToMakeの変更を加えてください。
+          要求された内容以外の装飾や追加は行わないでください。`,
         },
         {
           type: 'message',
           role: 'user',
           content: `
 
-          ==== Conversation History ====
+          ==== 会話履歴 ====
           ${JSON.stringify(filteredLogs, null, 2)}
 
-          ==== Current Workspace State ====
+          ==== 現在のワークスペースの状態 ====
           ${JSON.stringify(await getWorkspaceInfo(), null, 2)}
 
-          ==== Requested Workspace Changes to Make ====
+          ==== 要求されたワークスペースの変更 ====
           ${workspaceChangesToMake}
           `,
         },

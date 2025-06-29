@@ -1,6 +1,6 @@
 "use client";
 
-// A standard React context/provider implementation for workspace state.
+// ワークスペース状態のための標準的なReactコンテキスト/プロバイダーの実装
 
 import React, {
   createContext,
@@ -16,13 +16,13 @@ import { nanoid } from "nanoid";
 import type { WorkspaceTab } from "@/app/types";
 
 export interface WorkspaceState {
-  // Data
+  // データ
   name: string;
   description: string;
   tabs: WorkspaceTab[];
   selectedTabId: string;
 
-  // Mutators
+  // 状態変更関数
   setName: (n: string) => void;
   setDescription: (d: string) => void;
   setTabs: (tabs: WorkspaceTab[]) => void;
@@ -36,7 +36,7 @@ const WorkspaceContext = createContext<WorkspaceState | undefined>(undefined);
 
 export const WorkspaceProvider: FC<PropsWithChildren> = ({ children }) => {
   // -----------------------------------------------------------------------
-  // Raw state values
+  // 基本的な状態値
   // -----------------------------------------------------------------------
 
   const [name, setName] = useState("");
@@ -44,7 +44,7 @@ export const WorkspaceProvider: FC<PropsWithChildren> = ({ children }) => {
   const [tabs, setTabsInternal] = useState<WorkspaceTab[]>([]);
   const [selectedTabId, setSelectedTabIdInternal] = useState<string>("");
 
-  // Load from localStorage on mount
+  // マウント時にlocalStorageから読み込む
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const saved = localStorage.getItem('workspaceState');
@@ -56,12 +56,12 @@ export const WorkspaceProvider: FC<PropsWithChildren> = ({ children }) => {
         if (Array.isArray(parsed.tabs)) setTabsInternal(parsed.tabs);
         if (parsed.selectedTabId) setSelectedTabIdInternal(parsed.selectedTabId);
       } catch (e) {
-        // ignore
+        // エラーを無視
       }
     }
   }, []);
 
-  // Save to localStorage on any change
+  // 値が変更されるたびにlocalStorageに保存する
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const state = { name, description, tabs, selectedTabId };
@@ -69,7 +69,7 @@ export const WorkspaceProvider: FC<PropsWithChildren> = ({ children }) => {
   }, [name, description, tabs, selectedTabId]);
 
   // -----------------------------------------------------------------------
-  // Helper setters that also maintain invariants
+  // 不変条件を保持するヘルパーセッター関数
   // -----------------------------------------------------------------------
 
   const setTabs = useCallback((newTabs: WorkspaceTab[]) => {
@@ -93,7 +93,7 @@ export const WorkspaceProvider: FC<PropsWithChildren> = ({ children }) => {
           type: partial.type ?? "markdown",
           content: partial.content ?? "",
         };
-        // Select the new tab
+        // 新しいタブを選択する
         setSelectedTabIdInternal(id);
         return [...prev, newTab];
       });
@@ -121,7 +121,7 @@ export const WorkspaceProvider: FC<PropsWithChildren> = ({ children }) => {
   }, []);
 
   // -----------------------------------------------------------------------
-  // Compose state object and update ref each render
+  // 状態オブジェクトを構成し、各レンダー時に参照を更新
   // -----------------------------------------------------------------------
 
   const value: WorkspaceState = {
@@ -138,7 +138,7 @@ export const WorkspaceProvider: FC<PropsWithChildren> = ({ children }) => {
     setSelectedTabId,
   };
 
-  // Update shared ref so `useWorkspaceContext.getState()` is always current.
+  // `useWorkspaceContext.getState()`が常に最新になるよう共有参照を更新
   WorkspaceProviderState.current = value;
 
   return (
@@ -156,7 +156,7 @@ export function useWorkspaceContext<T>(selector: (state: WorkspaceState) => T): 
   return selector(ctx);
 }
 
-// expose getState for imperative access (Sidebar uses it)
+// 命令的アクセス用にgetStateを公開（サイドバーで使用）
 useWorkspaceContext.getState = (): WorkspaceState => {
   if (!WorkspaceProviderState.current) {
     throw new Error("Workspace context not yet initialised");
@@ -167,7 +167,7 @@ useWorkspaceContext.getState = (): WorkspaceState => {
 const WorkspaceProviderState = { current: null as unknown as WorkspaceState };
 
 
-// Resolves a tab ID from a list of tabs and lookup info (id, index, or name).
+// タブリストと検索情報（id、index、またはname）からタブIDを解決する
 function resolveTabId(
   tabs: WorkspaceTab[],
   opts: { id?: string; index?: number; name?: string }
@@ -176,7 +176,7 @@ function resolveTabId(
   if (typeof id === 'string' && id) {
     return id;
   }
-  // Prefer name over index if both are provided
+  // 両方が提供された場合はindexよりnameを優先
   if (typeof name === 'string') {
     const tabByName = tabs.find((t) => t.name.toLowerCase() === name.toLowerCase());
     if (tabByName) return tabByName.id;
@@ -188,7 +188,7 @@ function resolveTabId(
 }
 
 // ---------------------------------------------------------------------------
-// Helper functions (used by WorkspaceManager agent tools)
+// ヘルパー関数（WorkspaceManagerエージェントツールで使用）
 // ---------------------------------------------------------------------------
 
 export async function setWorkspaceInfo(input: any) {

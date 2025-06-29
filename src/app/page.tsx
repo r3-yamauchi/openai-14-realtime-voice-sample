@@ -6,7 +6,7 @@ import App from "./App";
 
 export default function Page() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>読み込み中...</div>}>
       <TranscriptProvider>
         <EventProvider>
           <WorkspaceProvider>

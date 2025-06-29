@@ -1,4 +1,4 @@
-// Central re-exports so agent files don’t need to reach deep into the SDK path
+// エージェントファイルが SDK パスに深くアクセスする必要がないように、中央で再エクスポートします。
 
 export { tool } from '@openai/agents/realtime';
 export type { RealtimeAgent, FunctionTool } from '@openai/agents/realtime';

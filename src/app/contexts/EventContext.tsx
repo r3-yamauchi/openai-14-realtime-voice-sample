@@ -77,7 +77,7 @@ export const EventProvider: FC<PropsWithChildren> = ({ children }) => {
 export function useEvent() {
   const context = useContext(EventContext);
   if (!context) {
-    throw new Error("useEvent must be used within an EventProvider");
+    throw new Error("useEventはEventProvider内で使用する必要があります");
   }
   return context;
 }

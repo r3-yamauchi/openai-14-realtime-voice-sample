@@ -50,11 +50,11 @@ export default function Sidebar({
         onClick={handleAddDefaultTab}
         className="flex items-center gap-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
       >
-        <FontAwesomeIcon icon={faPlus} className="h-4 w-4" /> Add tab
+        <FontAwesomeIcon icon={faPlus} className="h-4 w-4" /> タブを追加
       </button>
 
       <div className="flex-1" />
-      {/* Reset Button sticky at the bottom of the sidebar */}
+      {/* サイドバーの下部に固定されたリセットボタン */}
       <button
         onClick={() => {
           localStorage.removeItem('workspaceState');
@@ -62,11 +62,11 @@ export default function Sidebar({
         }}
         className="w-full mb-1 py-2 rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-400 hover:text-red-500 hover:border-red-300 dark:hover:border-red-500 shadow-sm transition-all text-xs font-medium opacity-80 hover:opacity-100 z-10"
         style={{ position: 'sticky', bottom: 0 }}
-        title="Reset workspace to default"
+        title="ワークスペースをデフォルトにリセット"
       >
         <span className="flex items-center justify-center gap-2">
           <FontAwesomeIcon icon={faTrash} className="h-3 w-3" />
-          Reset Workspace
+          ワークスペースをリセット
         </span>
       </button>
     </div>

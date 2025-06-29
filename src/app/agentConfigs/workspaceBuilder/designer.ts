@@ -7,14 +7,14 @@ import { designerPrompt1, designerPrompt2 } from './prompts';
 const searchTheWeb = tool({
   name: 'searchTheWeb',
   description:
-    'Search the web for helpful information. When the tool finishes, make sure to update the workspace with relevant information.',
+    '役立つ情報をウェブで検索します。ツールが完了したら、関連情報でワークスペースを更新してください。',
   parameters: {
     type: 'object',
     properties: {
       query: {
         type: 'string',
         description:
-          'A search query to find web results',
+          'ウェブ検索結果を見つけるための検索クエリ',
       },
     },
     required: ['query'],
@@ -36,16 +36,16 @@ const searchTheWeb = tool({
         model: "gpt-4.1",
         tools: [ { type: "web_search_preview" } ],
         tool_choice: "required",
-        input: `You're a web search assistant. Search the web and respond with relevant information based on the Search Query given the conversation history.
+        input: `あなたはウェブ検索アシスタントです。会話履歴に基づいて、検索クエリに関連する情報でウェブを検索し、応答してください。
 
-          IMPORTANT: 
-          - Your response should be in markdown format.
-          - Whenever possible, your response should include links to inspiration images, and make sure you use markdown image syntax.
+          重要:
+          - 応答はMarkdown形式である必要があります。
+          - 可能な限り、応答にはインスピレーション画像のリンクを含め、Markdown画像構文を使用してください。
 
-          ==== Recent Conversation History ====
+          ==== 最近の会話履歴 ====
           ${JSON.stringify(filteredLogs, null, 2)}
           
-          ==== Search Query ====
+          ==== 検索クエリ ====
           ${query}`,
     };
 
@@ -53,7 +53,7 @@ const searchTheWeb = tool({
     const responseText = response.output_text;
     addBreadcrumb?.('[web search] response', { responseText });
     if (response.error) {
-      return { error: 'Something went wrong.' };
+      return { error: '何か問題が発生しました。' };
     }
 
     return { webResponse: responseText as string };

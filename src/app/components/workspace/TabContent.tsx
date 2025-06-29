@@ -72,10 +72,10 @@ export default function TabContent({ tab }: Props) {
         </div>
         <div className="flex gap-2 mt-2">
           <button className={buttonClass} onClick={handleSave}>
-            Save
+            保存
           </button>
           <button className={cancelClass} onClick={handleCancel}>
-            Cancel
+            キャンセル
           </button>
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function TabContent({ tab }: Props) {
           className={buttonClass}
           onClick={() => setEditing(true)}
         >
-          Edit
+          編集
         </button>
       </div>
       <div>{content}</div>
@@ -111,7 +111,7 @@ export default function TabContent({ tab }: Props) {
 
 
 // ──────────────────────────────────────────────────────────
-// Markdown renderer (very minimal, no external deps)
+// Markdownレンダラー（非常に最小限、外部依存なし）
 // ──────────────────────────────────────────────────────────
 
 function MarkdownView({ markdown }: { markdown: string }) {
@@ -123,7 +123,7 @@ function MarkdownView({ markdown }: { markdown: string }) {
 }
 
 // ──────────────────────────────────────────────────────────
-// CSV renderer (| delimited)
+// CSVレンダラー（|区切り）
 // ──────────────────────────────────────────────────────────
 
 function CsvView({ csv }: { csv: string }) {

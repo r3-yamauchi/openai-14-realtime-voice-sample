@@ -44,7 +44,7 @@ export const TranscriptProvider: FC<PropsWithChildren> = ({ children }) => {
   const addTranscriptMessage: TranscriptContextValue["addTranscriptMessage"] = (itemId, role, text = "", isHidden = false) => {
     setTranscriptItems((prev) => {
       if (prev.some((log) => log.itemId === itemId && log.type === "MESSAGE")) {
-        console.warn(`[addTranscriptMessage] skipping; message already exists for itemId=${itemId}, role=${role}, text=${text}`);
+        console.warn(`[addTranscriptMessage] スキップ中; itemId=${itemId}, role=${role}, text=${text} のメッセージは既に存在します`);
         return prev;
       }
 

@@ -1,5 +1,7 @@
 # OpenAI リアルタイム音声チャットアプリケーション
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/r3-yamauchi/openai-14-realtime-voice-sample)
+
 このプロジェクトは、OpenAI Realtime API と OpenAI Agents SDK を使用したエンタープライズ級の音声チャットアプリケーションです。日本語での自然な音声対話を提供する Next.js アプリケーションとして実装されており、型安全性、パフォーマンス最適化、保守性を重視した設計となっています。
 
 ## 概要

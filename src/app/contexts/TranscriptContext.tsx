@@ -4,11 +4,13 @@ import React, {
   createContext,
   useContext,
   useState,
+  useCallback,
   FC,
   PropsWithChildren,
 } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { TranscriptItem } from "@/app/types";
+import { formatDetailedTimestamp } from "@/app/lib/formatters";
 
 type TranscriptContextValue = {
   transcriptItems: TranscriptItem[];
@@ -29,21 +31,20 @@ const TranscriptContext = createContext<TranscriptContextValue | undefined>(unde
 export const TranscriptProvider: FC<PropsWithChildren> = ({ children }) => {
   const [transcriptItems, setTranscriptItems] = useState<TranscriptItem[]>([]);
 
-  function newTimestampPretty(): string {
-    const now = new Date();
-    const time = now.toLocaleTimeString([], {
-      hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-    const ms = now.getMilliseconds().toString().padStart(3, "0");
-    return `${time}.${ms}`;
-  }
+  // 効率的な検索のためのMap化されたアイテム（将来の最適化で使用予定）
+  // const transcriptItemsMap = useMemo(() => {
+  //   const map = new Map<string, TranscriptItem>();
+  //   transcriptItems.forEach(item => {
+  //     map.set(item.itemId, item);
+  //   });
+  //   return map;
+  // }, [transcriptItems]);
 
-  const addTranscriptMessage: TranscriptContextValue["addTranscriptMessage"] = (itemId, role, text = "", isHidden = false) => {
+  const addTranscriptMessage: TranscriptContextValue["addTranscriptMessage"] = useCallback((itemId, role, text = "", isHidden = false) => {
     setTranscriptItems((prev) => {
-      if (prev.some((log) => log.itemId === itemId && log.type === "MESSAGE")) {
+      // Map を使用して効率的な存在確認
+      const existingItem = prev.find(log => log.itemId === itemId && log.type === "MESSAGE");
+      if (existingItem) {
         console.warn(`[addTranscriptMessage] スキップ中; itemId=${itemId}, role=${role}, text=${text} のメッセージは既に存在します`);
         return prev;
       }
@@ -54,7 +55,7 @@ export const TranscriptProvider: FC<PropsWithChildren> = ({ children }) => {
         role,
         title: text,
         expanded: false,
-        timestamp: newTimestampPretty(),
+        timestamp: formatDetailedTimestamp(),
         createdAtMs: Date.now(),
         status: "IN_PROGRESS",
         isHidden,
@@ -62,23 +63,25 @@ export const TranscriptProvider: FC<PropsWithChildren> = ({ children }) => {
 
       return [...prev, newItem];
     });
-  };
+  }, []);
 
-  const updateTranscriptMessage: TranscriptContextValue["updateTranscriptMessage"] = (itemId, newText, append = false) => {
-    setTranscriptItems((prev) =>
-      prev.map((item) => {
-        if (item.itemId === itemId && item.type === "MESSAGE") {
-          return {
-            ...item,
-            title: append ? (item.title ?? "") + newText : newText,
-          };
-        }
-        return item;
-      })
-    );
-  };
+  const updateTranscriptMessage: TranscriptContextValue["updateTranscriptMessage"] = useCallback((itemId, newText, append = false) => {
+    setTranscriptItems((prev) => {
+      const itemIndex = prev.findIndex(item => item.itemId === itemId && item.type === "MESSAGE");
+      if (itemIndex === -1) return prev;
+      
+      const updatedItems = [...prev];
+      const item = updatedItems[itemIndex];
+      updatedItems[itemIndex] = {
+        ...item,
+        title: append ? (item.title ?? "") + newText : newText,
+      };
+      
+      return updatedItems;
+    });
+  }, []);
 
-  const addTranscriptBreadcrumb: TranscriptContextValue["addTranscriptBreadcrumb"] = (title, data) => {
+  const addTranscriptBreadcrumb: TranscriptContextValue["addTranscriptBreadcrumb"] = useCallback((title, data) => {
     setTranscriptItems((prev) => [
       ...prev,
       {
@@ -87,29 +90,38 @@ export const TranscriptProvider: FC<PropsWithChildren> = ({ children }) => {
         title,
         data,
         expanded: false,
-        timestamp: newTimestampPretty(),
+        timestamp: formatDetailedTimestamp(),
         createdAtMs: Date.now(),
         status: "DONE",
         isHidden: false,
       },
     ]);
-  };
+  }, []);
 
-  const toggleTranscriptItemExpand: TranscriptContextValue["toggleTranscriptItemExpand"] = (itemId) => {
-    setTranscriptItems((prev) =>
-      prev.map((log) =>
-        log.itemId === itemId ? { ...log, expanded: !log.expanded } : log
-      )
-    );
-  };
+  const toggleTranscriptItemExpand: TranscriptContextValue["toggleTranscriptItemExpand"] = useCallback((itemId) => {
+    setTranscriptItems((prev) => {
+      const itemIndex = prev.findIndex(item => item.itemId === itemId);
+      if (itemIndex === -1) return prev;
+      
+      const updatedItems = [...prev];
+      const item = updatedItems[itemIndex];
+      updatedItems[itemIndex] = { ...item, expanded: !item.expanded };
+      
+      return updatedItems;
+    });
+  }, []);
 
-  const updateTranscriptItem: TranscriptContextValue["updateTranscriptItem"] = (itemId, updatedProperties) => {
-    setTranscriptItems((prev) =>
-      prev.map((item) =>
-        item.itemId === itemId ? { ...item, ...updatedProperties } : item
-      )
-    );
-  };
+  const updateTranscriptItem: TranscriptContextValue["updateTranscriptItem"] = useCallback((itemId, updatedProperties) => {
+    setTranscriptItems((prev) => {
+      const itemIndex = prev.findIndex(item => item.itemId === itemId);
+      if (itemIndex === -1) return prev;
+      
+      const updatedItems = [...prev];
+      updatedItems[itemIndex] = { ...updatedItems[itemIndex], ...updatedProperties };
+      
+      return updatedItems;
+    });
+  }, []);
 
   return (
     <TranscriptContext.Provider

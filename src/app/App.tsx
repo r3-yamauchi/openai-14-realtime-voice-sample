@@ -172,19 +172,53 @@ function App() {
   }, [isPTTActive]);
 
   const fetchEphemeralKey = async (): Promise<string | null> => {
-    logClientEvent({ url: "/session" }, "fetch_session_token_request");
-    const tokenResponse = await fetch("/api/session");
-    const data = await tokenResponse.json();
-    logServerEvent(data, "fetch_session_token_response");
+    try {
+      logClientEvent({ url: "/session" }, "fetch_session_token_request");
+      const tokenResponse = await fetch("/api/session");
 
-    if (!data.client_secret?.value) {
-      logClientEvent(data, "error.no_ephemeral_key");
-      console.error("No ephemeral key provided by the server");
+      if (!tokenResponse.ok) {
+        console.error(`API responded with status ${tokenResponse.status}`);
+        const errorText = await tokenResponse.text();
+        logClientEvent({ error: errorText, status: tokenResponse.status }, "fetch_session_token_error");
+        setSessionStatus("DISCONNECTED");
+        return null;
+      }
+
+      const responseText = await tokenResponse.text();
+      if (!responseText) {
+        console.error("Empty response from API");
+        logClientEvent({ error: "Empty response" }, "fetch_session_token_error");
+        setSessionStatus("DISCONNECTED");
+        return null;
+      }
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Failed to parse JSON response:", parseError);
+        console.error("Response text:", responseText);
+        logClientEvent({ error: "Invalid JSON response", responseText }, "fetch_session_token_error");
+        setSessionStatus("DISCONNECTED");
+        return null;
+      }
+
+      logServerEvent(data, "fetch_session_token_response");
+
+      if (!data.client_secret?.value) {
+        logClientEvent(data, "error.no_ephemeral_key");
+        console.error("No ephemeral key provided by the server");
+        setSessionStatus("DISCONNECTED");
+        return null;
+      }
+
+      return data.client_secret.value;
+    } catch (error) {
+      console.error("Error fetching ephemeral key:", error);
+      logClientEvent({ error: String(error) }, "fetch_session_token_error");
       setSessionStatus("DISCONNECTED");
       return null;
     }
-
-    return data.client_secret.value;
   };
 
   const connectToRealtime = async () => {

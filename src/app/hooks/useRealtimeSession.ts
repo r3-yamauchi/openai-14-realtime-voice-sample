@@ -163,7 +163,7 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
     updateStatus('DISCONNECTED');
   }, [updateStatus]);
 
-  const assertconnected = () => {
+  const assertConnected = () => {
     if (!sessionRef.current) throw new Error('RealtimeSessionが接続されていません');
   };
 
@@ -174,7 +174,7 @@ export function useRealtimeSession(callbacks: RealtimeSessionCallbacks = {}) {
   }, []);
   
   const sendUserText = useCallback((text: string) => {
-    assertconnected();
+    assertConnected();
     sessionRef.current!.sendMessage(text);
   }, []);
 

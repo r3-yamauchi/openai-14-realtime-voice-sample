@@ -1,16 +1,16 @@
-import { simpleHandoffScenario } from './simpleHandoff';
-import { customerServiceRetailScenario } from './customerServiceRetail';
-import { chatSupervisorScenario } from './chatSupervisor';
-import { workspaceBuilderScenario } from './workspaceBuilder';
+import { simpleChatScenario } from './simpleChat';
 
 import type { RealtimeAgent } from '@openai/agents/realtime';
 
-// シナリオキーと RealtimeAgent オブジェクトの配列のマッピング
+/**
+ * 全エージェントセットの定義
+ * シナリオキーと RealtimeAgent オブジェクトの配列のマッピング
+ */
 export const allAgentSets: Record<string, RealtimeAgent[]> = {
-  workspaceBuilder: workspaceBuilderScenario,
-  customerServiceRetail: customerServiceRetailScenario,
-  chatSupervisor: chatSupervisorScenario,
-  simpleHandoff: simpleHandoffScenario,  
+  simpleChat: simpleChatScenario, // シンプル音声チャットシナリオ
 };
 
-export const defaultAgentSetKey = 'workspaceBuilder';
+/**
+ * デフォルトで使用するエージェントセットのキー
+ */
+export const defaultAgentSetKey = 'simpleChat';

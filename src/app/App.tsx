@@ -9,11 +9,10 @@ import Image from "next/image";
 import Transcript from "./components/Transcript";
 import Events from "./components/Events";
 import BottomToolbar from "./components/BottomToolbar";
-import Workspace from "./components/Workspace";
 
 // 型定義
 import { SessionStatus } from "@/app/types";
-import type { RealtimeAgent, RealtimeOutputGuardrail } from '@openai/agents/realtime';
+import type { RealtimeAgent } from '@openai/agents/realtime';
 
 // コンテキストプロバイダーとフック
 import { useTranscript } from "@/app/contexts/TranscriptContext";
@@ -23,25 +22,15 @@ import { createModerationGuardrail } from "@/app/agentConfigs/guardrails";
 
 // エージェント設定
 import { allAgentSets, defaultAgentSetKey } from "@/app/agentConfigs";
-import { customerServiceRetailScenario } from "@/app/agentConfigs/customerServiceRetail";
-import { chatSupervisorScenario } from "@/app/agentConfigs/chatSupervisor";
-import { customerServiceRetailCompanyName } from "@/app/agentConfigs/customerServiceRetail";
-import { chatSupervisorCompanyName } from "@/app/agentConfigs/chatSupervisor";
-import { simpleHandoffScenario } from "@/app/agentConfigs/simpleHandoff";
-import { workspaceBuilderScenario } from "@/app/agentConfigs/workspaceBuilder";
+import { simpleChatScenario } from "@/app/agentConfigs/simpleChat";
 
 // SDK で定義されたシナリオの接続ロジックで使用されるマップ。
 const sdkScenarioMap: Record<string, RealtimeAgent[]> = {
-  workspaceBuilder: workspaceBuilderScenario,
-  customerServiceRetail: customerServiceRetailScenario,
-  chatSupervisor: chatSupervisorScenario,
-  simpleHandoff: simpleHandoffScenario,
+  simpleChat: simpleChatScenario,
 };
 
 import useAudioDownload from "./hooks/useAudioDownload";
 import { useHandleSessionHistory } from "./hooks/useHandleSessionHistory";
-import { create } from "domain";
-import { createDesignGuardrail } from "./agentConfigs/workspaceBuilder/guardrails";
 
 function App() {
   const searchParams = useSearchParams()!;
@@ -218,14 +207,8 @@ function App() {
 
         let guardrails = undefined;
         switch (agentSetKey) {
-          case 'customerServiceRetail':
-            guardrails = [createModerationGuardrail(customerServiceRetailCompanyName)];
-            break;
-          case 'chatSupervisor':
-            guardrails = [createModerationGuardrail(chatSupervisorCompanyName)];
-            break;
-          case 'workspaceBuilder':
-            // guardrails = [createDesignGuardrail()];
+          case 'simpleChat':
+            guardrails = [createModerationGuardrail('Chat')];
             break;
         }
 
@@ -448,8 +431,7 @@ function App() {
     if (stored !== null) {
       setIsTranscriptVisible(stored === 'true');
     } else {
-      const agentSetKey = (new URL(window.location.href).searchParams.get('agentConfig') || 'default');
-      setIsTranscriptVisible(agentSetKey !== 'workspaceBuilder');
+      setIsTranscriptVisible(true);
     }
   }, []);
 
@@ -541,7 +523,6 @@ function App() {
       </div>
 
       <div className="flex flex-1 gap-2 px-2 overflow-hidden relative">
-        {agentSetKey === "workspaceBuilder" && <Workspace />}
         <Transcript
           userText={userText}
           setUserText={setUserText}

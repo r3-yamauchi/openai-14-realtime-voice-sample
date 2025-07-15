@@ -1,24 +1,32 @@
 import React from "react";
 import { SessionStatus } from "@/app/types";
 
+/**
+ * ボトムツールバーコンポーネントのプロパティ定義
+ */
 interface BottomToolbarProps {
-  sessionStatus: SessionStatus;
-  onToggleConnection: () => void;
-  isPTTActive: boolean;
-  setIsPTTActive: (val: boolean) => void;
-  isPTTUserSpeaking: boolean;
-  handleTalkButtonDown: () => void;
-  handleTalkButtonUp: () => void;
-  isEventsPaneExpanded: boolean;
-  setIsEventsPaneExpanded: (val: boolean) => void;
-  isAudioPlaybackEnabled: boolean;
-  setIsAudioPlaybackEnabled: (val: boolean) => void;
-  codec: string;
-  onCodecChange: (newCodec: string) => void;
-  isTranscriptVisible: boolean;
-  setIsTranscriptVisible: (val: boolean) => void;
+  sessionStatus: SessionStatus; // セッション接続状態
+  onToggleConnection: () => void; // 接続切り替えハンドラー
+  isPTTActive: boolean; // Push-to-Talk モードの有効状態
+  setIsPTTActive: (val: boolean) => void; // PTTモード切り替え
+  isPTTUserSpeaking: boolean; // ユーザーが話している状態
+  handleTalkButtonDown: () => void; // トークボタン押下ハンドラー
+  handleTalkButtonUp: () => void; // トークボタン解放ハンドラー
+  isEventsPaneExpanded: boolean; // イベントペインの展開状態
+  setIsEventsPaneExpanded: (val: boolean) => void; // イベントペイン切り替え
+  isAudioPlaybackEnabled: boolean; // オーディオ再生の有効状態
+  setIsAudioPlaybackEnabled: (val: boolean) => void; // オーディオ再生切り替え
+  codec: string; // 現在使用中のオーディオコーデック
+  onCodecChange: (newCodec: string) => void; // コーデック変更ハンドラー
+  isTranscriptVisible: boolean; // トランスクリプトペインの表示状態
+  setIsTranscriptVisible: (val: boolean) => void; // トランスクリプト表示切り替え
 }
 
+/**
+ * ボトムツールバーコンポーネント
+ * アプリケーション下部に配置される操作パネル
+ * 接続制御、音声設定、ペイン表示切り替えなどの機能を提供
+ */
 function BottomToolbar({
   sessionStatus,
   onToggleConnection,
@@ -36,14 +44,21 @@ function BottomToolbar({
   isTranscriptVisible,
   setIsTranscriptVisible,
 }: BottomToolbarProps) {
+  // セッション状態の判定
   const isConnected = sessionStatus === "CONNECTED";
   const isConnecting = sessionStatus === "CONNECTING";
 
+  /**
+   * コーデック変更ハンドラー
+   */
   const handleCodecChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newCodec = e.target.value;
     onCodecChange(newCodec);
   };
 
+  /**
+   * 接続ボタンのラベル生成
+   */
   function getConnectionButtonLabel() {
     if (isConnected) return "切断";
     if (isConnecting) return "接続中...";

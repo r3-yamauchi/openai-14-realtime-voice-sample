@@ -146,26 +146,3 @@ export const GuardrailOutputZod = z.object({
 });
 
 export type GuardrailOutput = z.infer<typeof GuardrailOutputZod>;
-
-export type WorkspaceTabType = "markdown" | "csv";
-
-export interface WorkspaceTab {
-  id: string;
-  name: string;
-  type: WorkspaceTabType;
-  content: string;
-}
-
-export interface Workspace {
-  name: string;
-  description: string;
-  tabs: WorkspaceTab[];
-}
-
-export function createEmptyWorkspace(): Workspace {
-  return {
-    name: "",
-    description: "",
-    tabs: [],
-  };
-} 

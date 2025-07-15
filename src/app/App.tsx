@@ -21,7 +21,6 @@ import { useRealtimeSession } from "./hooks/useRealtimeSession";
 import { createModerationGuardrail } from "@/app/agentConfigs/guardrails";
 
 // エージェント設定
-import { allAgentSets, defaultAgentSetKey } from "@/app/agentConfigs";
 import { createSimpleChatAgent, SpeechSpeedLevel } from "@/app/agentConfigs/simpleChat";
 
 // SDK で定義されたシナリオの接続ロジックで使用されるマップ。
@@ -128,22 +127,13 @@ function App() {
 
   useHandleSessionHistory();
 
+  const [isTranscriptVisible, setIsTranscriptVisible] = useState(true);
+  const [speechSpeed, setSpeechSpeed] = useState<SpeechSpeedLevel>('normal');
+
   useEffect(() => {
-    let finalAgentConfig = searchParams.get("agentConfig");
-    if (!finalAgentConfig || !allAgentSets[finalAgentConfig]) {
-      finalAgentConfig = defaultAgentSetKey;
-      const url = new URL(window.location.toString());
-      url.searchParams.set("agentConfig", finalAgentConfig);
-      window.location.replace(url.toString());
-      return;
-    }
-
-    const agents = allAgentSets[finalAgentConfig];
-    const agentKeyToUse = agents[0]?.name || "";
-
-    setSelectedAgentName(agentKeyToUse);
-    setSelectedAgentConfigSet(agents);
-  }, [searchParams]);
+    setSelectedAgentName('simpleChat');
+    setSelectedAgentConfigSet([createSimpleChatAgent(speechSpeed)]);
+  }, [speechSpeed]);
 
   useEffect(() => {
     if (selectedAgentName && sessionStatus === "DISCONNECTED") {
@@ -224,10 +214,9 @@ function App() {
   };
 
   const connectToRealtime = async () => {
-    const agentSetKey = searchParams.get("agentConfig") || "default";
     const sdkScenarioMap = getSdkScenarioMap(speechSpeed);
     
-    if (sdkScenarioMap[agentSetKey]) {
+    if (sdkScenarioMap['simpleChat']) {
       if (sessionStatus !== "DISCONNECTED") return;
       setSessionStatus("CONNECTING");
 
@@ -236,19 +225,14 @@ function App() {
         if (!EPHEMERAL_KEY) return;
 
         // 選択されたエージェント名が最初になるようにして、それがルートになるようにする
-        const reorderedAgents = [...sdkScenarioMap[agentSetKey]];
+        const reorderedAgents = [...sdkScenarioMap['simpleChat']];
         const idx = reorderedAgents.findIndex((a) => a.name === selectedAgentName);
         if (idx > 0) {
           const [agent] = reorderedAgents.splice(idx, 1);
           reorderedAgents.unshift(agent);
         }
 
-        let guardrails = undefined;
-        switch (agentSetKey) {
-          case 'simpleChat':
-            guardrails = [createModerationGuardrail('Chat')];
-            break;
-        }
+        const guardrails = [createModerationGuardrail('Chat')];
 
         await connect({
           getEphemeralKey: async () => EPHEMERAL_KEY,
@@ -357,22 +341,6 @@ function App() {
     }
   };
 
-  const handleAgentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newAgentConfig = e.target.value;
-    const url = new URL(window.location.toString());
-    url.searchParams.set("agentConfig", newAgentConfig);
-    window.location.replace(url.toString());
-  };
-
-  const handleSelectedAgentChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const newAgentName = e.target.value;
-    // ツール実行が正しく機能するように、新しく選択されたエージェントをルートとしてセッションを再接続します。
-    disconnectFromRealtime();
-    setSelectedAgentName(newAgentName);
-    // connectToRealtime は selectedAgentName を監視するエフェクトによってトリガーされます。
-  };
 
   // 新しい接続が必要なため、コーデックが変更されたらページをリフレッシュします。
   const handleCodecChange = (newCodec: string) => {
@@ -382,7 +350,8 @@ function App() {
   };
 
   // 音声速度変更ハンドラー
-  const handleSpeechSpeedChange = (newSpeed: SpeechSpeedLevel) => {
+  const handleSpeechSpeedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newSpeed = e.target.value as SpeechSpeedLevel;
     setSpeechSpeed(newSpeed);
     // 接続中の場合は再接続が必要
     if (sessionStatus === "CONNECTED") {
@@ -472,11 +441,6 @@ function App() {
     };
   }, [sessionStatus]);
 
-  const agentSetKey = searchParams.get("agentConfig") || "default";
-
-  const [isTranscriptVisible, setIsTranscriptVisible] = useState(true);
-  const [speechSpeed, setSpeechSpeed] = useState<SpeechSpeedLevel>('normal');
-
   useEffect(() => {
     // Only run on client
     const stored = localStorage.getItem('transcriptVisible');
@@ -525,19 +489,20 @@ function App() {
         </div>
         <div className="flex items-center">
           <label className="flex items-center text-base gap-1 mr-2 font-medium">
-            Scenario
+            音声速度
           </label>
           <div className="relative inline-block">
             <select
-              value={agentSetKey}
-              onChange={handleAgentChange}
-              className="appearance-none border border-gray-300 rounded-lg text-base px-2 py-1 pr-8 cursor-pointer font-normal focus:outline-none"
+              value={speechSpeed}
+              onChange={handleSpeechSpeedChange}
+              disabled={sessionStatus === "CONNECTED"}
+              className="appearance-none border border-gray-300 rounded-lg text-base px-2 py-1 pr-8 cursor-pointer font-normal focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
-              {Object.keys(allAgentSets).map((agentKey) => (
-                <option key={agentKey} value={agentKey}>
-                  {agentKey}
-                </option>
-              ))}
+              <option value="very_slow">とても遅い</option>
+              <option value="slow">遅い</option>
+              <option value="normal">普通</option>
+              <option value="fast">速い</option>
+              <option value="very_fast">とても速い</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-600">
               <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -549,40 +514,6 @@ function App() {
               </svg>
             </div>
           </div>
-
-          {agentSetKey && (
-            <div className="flex items-center ml-6">
-              <label className="flex items-center text-base gap-1 mr-2 font-medium">
-                Agent
-              </label>
-              <div className="relative inline-block">
-                <select
-                  value={selectedAgentName}
-                  onChange={handleSelectedAgentChange}
-                  className="appearance-none border border-gray-300 rounded-lg text-base px-2 py-1 pr-8 cursor-pointer font-normal focus:outline-none"
-                >
-                  {selectedAgentConfigSet?.map((agent) => (
-                    <option key={agent.name} value={agent.name}>
-                      {agent.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-600">
-                  <svg
-                    className="h-4 w-4"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.44l3.71-3.21a.75.75 0 111.04 1.08l-4.25 3.65a.75.75 0 01-1.04 0L5.21 8.27a.75.75 0 01.02-1.06z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -614,8 +545,6 @@ function App() {
         onCodecChange={handleCodecChange}
         isTranscriptVisible={isTranscriptVisible}
         setIsTranscriptVisible={setIsTranscriptVisible}
-        speechSpeed={speechSpeed}
-        onSpeechSpeedChange={handleSpeechSpeedChange}
       />
     </div>
   );

@@ -22,11 +22,13 @@ import { createModerationGuardrail } from "@/app/agentConfigs/guardrails";
 
 // エージェント設定
 import { allAgentSets, defaultAgentSetKey } from "@/app/agentConfigs";
-import { simpleChatScenario } from "@/app/agentConfigs/simpleChat";
+import { createSimpleChatAgent, SpeechSpeedLevel } from "@/app/agentConfigs/simpleChat";
 
 // SDK で定義されたシナリオの接続ロジックで使用されるマップ。
-const sdkScenarioMap: Record<string, RealtimeAgent[]> = {
-  simpleChat: simpleChatScenario,
+const getSdkScenarioMap = (speechSpeed: SpeechSpeedLevel): Record<string, RealtimeAgent[]> => {
+  return {
+    simpleChat: [createSimpleChatAgent(speechSpeed)],
+  };
 };
 
 import useAudioDownload from "./hooks/useAudioDownload";
@@ -223,6 +225,8 @@ function App() {
 
   const connectToRealtime = async () => {
     const agentSetKey = searchParams.get("agentConfig") || "default";
+    const sdkScenarioMap = getSdkScenarioMap(speechSpeed);
+    
     if (sdkScenarioMap[agentSetKey]) {
       if (sessionStatus !== "DISCONNECTED") return;
       setSessionStatus("CONNECTING");
@@ -232,12 +236,12 @@ function App() {
         if (!EPHEMERAL_KEY) return;
 
         // 選択されたエージェント名が最初になるようにして、それがルートになるようにする
-    const reorderedAgents = [...sdkScenarioMap[agentSetKey]];
-    const idx = reorderedAgents.findIndex((a) => a.name === selectedAgentName);
-    if (idx > 0) {
-      const [agent] = reorderedAgents.splice(idx, 1);
-      reorderedAgents.unshift(agent);
-    }
+        const reorderedAgents = [...sdkScenarioMap[agentSetKey]];
+        const idx = reorderedAgents.findIndex((a) => a.name === selectedAgentName);
+        if (idx > 0) {
+          const [agent] = reorderedAgents.splice(idx, 1);
+          reorderedAgents.unshift(agent);
+        }
 
         let guardrails = undefined;
         switch (agentSetKey) {
@@ -377,6 +381,19 @@ function App() {
     window.location.replace(url.toString());
   };
 
+  // 音声速度変更ハンドラー
+  const handleSpeechSpeedChange = (newSpeed: SpeechSpeedLevel) => {
+    setSpeechSpeed(newSpeed);
+    // 接続中の場合は再接続が必要
+    if (sessionStatus === "CONNECTED") {
+      disconnectFromRealtime();
+      // 少し待ってから再接続
+      setTimeout(() => {
+        connectToRealtime();
+      }, 500);
+    }
+  };
+
   useEffect(() => {
     const storedPushToTalkUI = localStorage.getItem("pushToTalkUI");
     if (storedPushToTalkUI) {
@@ -458,6 +475,7 @@ function App() {
   const agentSetKey = searchParams.get("agentConfig") || "default";
 
   const [isTranscriptVisible, setIsTranscriptVisible] = useState(true);
+  const [speechSpeed, setSpeechSpeed] = useState<SpeechSpeedLevel>('normal');
 
   useEffect(() => {
     // Only run on client
@@ -467,11 +485,23 @@ function App() {
     } else {
       setIsTranscriptVisible(true);
     }
+
+    // 音声速度の設定をローカルストレージから読み込み
+    const storedSpeechSpeed = localStorage.getItem('speechSpeed');
+    if (storedSpeechSpeed && ['very_slow', 'slow', 'normal', 'fast', 'very_fast'].includes(storedSpeechSpeed)) {
+      setSpeechSpeed(storedSpeechSpeed as SpeechSpeedLevel);
+    } else {
+      setSpeechSpeed('normal');
+    }
   }, []);
 
   useEffect(() => {
     localStorage.setItem('transcriptVisible', isTranscriptVisible.toString());
   }, [isTranscriptVisible]);
+
+  useEffect(() => {
+    localStorage.setItem('speechSpeed', speechSpeed);
+  }, [speechSpeed]);
 
   return (
     <div className="text-base flex flex-col h-screen bg-gray-100 text-gray-800 relative">
@@ -584,6 +614,8 @@ function App() {
         onCodecChange={handleCodecChange}
         isTranscriptVisible={isTranscriptVisible}
         setIsTranscriptVisible={setIsTranscriptVisible}
+        speechSpeed={speechSpeed}
+        onSpeechSpeedChange={handleSpeechSpeedChange}
       />
     </div>
   );

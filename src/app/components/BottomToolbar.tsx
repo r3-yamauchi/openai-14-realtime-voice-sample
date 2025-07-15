@@ -1,5 +1,6 @@
 import React from "react";
 import { SessionStatus } from "@/app/types";
+import { SpeechSpeedLevel } from "@/app/agentConfigs/simpleChat";
 
 /**
  * ボトムツールバーコンポーネントのプロパティ定義
@@ -20,6 +21,8 @@ interface BottomToolbarProps {
   onCodecChange: (newCodec: string) => void; // コーデック変更ハンドラー
   isTranscriptVisible: boolean; // トランスクリプトペインの表示状態
   setIsTranscriptVisible: (val: boolean) => void; // トランスクリプト表示切り替え
+  speechSpeed: SpeechSpeedLevel; // 音声速度レベル
+  onSpeechSpeedChange: (newSpeed: SpeechSpeedLevel) => void; // 音声速度変更ハンドラー
 }
 
 /**
@@ -43,6 +46,8 @@ function BottomToolbar({
   onCodecChange,
   isTranscriptVisible,
   setIsTranscriptVisible,
+  speechSpeed,
+  onSpeechSpeedChange,
 }: BottomToolbarProps) {
   // セッション状態の判定
   const isConnected = sessionStatus === "CONNECTED";
@@ -54,6 +59,28 @@ function BottomToolbar({
   const handleCodecChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newCodec = e.target.value;
     onCodecChange(newCodec);
+  };
+
+  /**
+   * 音声速度変更ハンドラー
+   */
+  const handleSpeechSpeedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newSpeed = e.target.value as SpeechSpeedLevel;
+    onSpeechSpeedChange(newSpeed);
+  };
+
+  /**
+   * 音声速度のラベル取得
+   */
+  const getSpeechSpeedLabel = (speed: SpeechSpeedLevel): string => {
+    const labels = {
+      very_slow: 'とても遅い',
+      slow: '遅い',
+      normal: '普通',
+      fast: '速い',
+      very_fast: 'とても速い'
+    };
+    return labels[speed];
   };
 
   /**
@@ -179,6 +206,26 @@ function BottomToolbar({
           <option value="pcmu">PCMU (8 kHz)</option>
           <option value="pcma">PCMA (8 kHz)</option>
         </select>
+      </div>
+
+      <div className="flex flex-row items-center gap-2">
+        <div>音声速度:</div>
+        <select
+          id="speech-speed-select"
+          value={speechSpeed}
+          onChange={handleSpeechSpeedChange}
+          disabled={isConnected}
+          className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+        >
+          <option value="very_slow">とても遅い</option>
+          <option value="slow">遅い</option>
+          <option value="normal">普通</option>
+          <option value="fast">速い</option>
+          <option value="very_fast">とても速い</option>
+        </select>
+        <span className="text-sm text-gray-600">
+          現在: {getSpeechSpeedLabel(speechSpeed)}
+        </span>
       </div>
     </div>
   );
